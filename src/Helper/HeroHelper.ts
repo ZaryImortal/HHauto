@@ -9,13 +9,12 @@ import { randomInterval } from "./TimeHelper";
 
 export function getHero():KKHero
 {
-    if(unsafeWindow.Hero === undefined && unsafeWindow.shared?.Hero === undefined)
+    if(unsafeWindow.shared?.Hero === undefined)
     {
         setTimeout(autoLoop, Number(getStoredValue(HHStoredVarPrefixKey+"Temp_autoLoopTimeMili")))
         //logHHAuto(window.wrappedJSObject)
     }
-    //logHHAuto(unsafeWindow.Hero);
-    return unsafeWindow.Hero || unsafeWindow.shared?.Hero;
+    return unsafeWindow.shared?.Hero;
 }
 
 export function doStatUpgrades()
@@ -108,7 +107,7 @@ export class HeroHelper {
         }
         //action=market_equip_booster&id_item=316&type=booster
         setStoredValue(HHStoredVarPrefixKey+"Temp_autoLoop", "false");
-        logHHAuto("Equip "+booster.name+", setting autoloop to false");
+        logHHAuto("equipBooster: Equip "+booster.name+" (id_item="+itemId+"), setting autoloop to false");
         const params = {
             action: "market_equip_booster",
             id_item: itemId,
@@ -120,16 +119,23 @@ export class HeroHelper {
             const currentPath = window.location.href.replace('http://', '').replace('https://', '').replace(window.location.hostname, '');
             window.history.replaceState(null, '', addNutakuSession('/shop.html') as string);
             getHHAjax()(params, function(data) {
-                if (data.success) logHHAuto('Booster equipped');
-                else HeroHelper.getSandalWoodEquipFailure(true); // Increase failure
+                logHHAuto(`equipBooster: AJAX success callback, data.success=${data.success}, full response=${JSON.stringify(data)}`);
+                if (data.success) {
+                    logHHAuto('equipBooster: Booster equipped successfully');
+                } else {
+                    logHHAuto('equipBooster: Server returned success:false (may already be equipped)');
+                    HeroHelper.getSandalWoodEquipFailure(true); // Increase failure
+                }
                 setStoredValue(HHStoredVarPrefixKey+"Temp_autoLoop", "true");
                 setTimeout(autoLoop,randomInterval(500,800));
-                resolve(true);
+                logHHAuto(`equipBooster: resolving with ${data.success}`);
+                resolve(data.success);
             }, function (err){
-                logHHAuto('Error occured booster not equipped, could be booster is already equipped');
+                logHHAuto('equipBooster: AJAX error callback - ' + err);
                 setStoredValue(HHStoredVarPrefixKey+"Temp_autoLoop", "true");
                 setTimeout(autoLoop,randomInterval(500,800));
                 HeroHelper.getSandalWoodEquipFailure(true); // Increase failure
+                logHHAuto('equipBooster: resolving with false');
                 resolve(false);
             });
             // change referer

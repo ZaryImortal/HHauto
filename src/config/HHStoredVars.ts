@@ -586,7 +586,11 @@ HHStoredVars[HHStoredVarPrefixKey+"Setting_autoQuest"] =
     getMenu:true,
     setMenu:true,
     menuType:"checked",
-    kobanUsing:false
+    kobanUsing:false,
+    newValueFunction:function()
+    {
+        deleteStoredValue(HHStoredVarPrefixKey + "Temp_questRequirement");
+    }
 };
 HHStoredVars[HHStoredVarPrefixKey+"Setting_autoSideQuest"] =
     {
@@ -696,6 +700,17 @@ HHStoredVars[HHStoredVarPrefixKey +"Setting_autoSeasonIgnoreNoGirls"] =
     setMenu:true,
     menuType:"checked",
     kobanUsing:false
+};
+HHStoredVars[HHStoredVarPrefixKey + "Setting_seasonDisplayPowerCalc"] =
+{
+    default: "true",
+    storage: "Storage()",
+    HHType: "Setting",
+    valueType: "Boolean",
+    getMenu: true,
+    setMenu: true,
+    menuType: "checked",
+    kobanUsing: false
 };
 HHStoredVars[HHStoredVarPrefixKey+"Setting_autoSeasonCollectablesList"] =
     {
@@ -1509,6 +1524,39 @@ HHStoredVars[HHStoredVarPrefixKey+"Setting_showInfoLeft"] =
     menuType:"checked",
     kobanUsing:false
 };
+HHStoredVars[HHStoredVarPrefixKey+"Setting_showHaremAvatarMissingGirls"] =
+    {
+    default:"false",
+    storage:"Storage()",
+    HHType:"Setting",
+    valueType:"Boolean",
+    getMenu:true,
+    setMenu:true,
+    menuType:"checked",
+    kobanUsing:false
+};
+HHStoredVars[HHStoredVarPrefixKey+"Setting_showHaremTools"] =
+    {
+    default:"true",
+    storage:"Storage()",
+    HHType:"Setting",
+    valueType:"Boolean",
+    getMenu:true,
+    setMenu:true,
+    menuType:"checked",
+    kobanUsing:false
+};
+HHStoredVars[HHStoredVarPrefixKey +"Setting_showHaremSkillsButtons"] =
+    {
+    default:"true",
+    storage:"Storage()",
+    HHType:"Setting",
+    valueType:"Boolean",
+    getMenu:true,
+    setMenu:true,
+    menuType:"checked",
+    kobanUsing:false
+};
 HHStoredVars[HHStoredVarPrefixKey+"Setting_showMarketTools"] =
     {
     default:"false",
@@ -2056,6 +2104,16 @@ HHStoredVars[HHStoredVarPrefixKey+"Temp_haremGirlLimit"] =
     HHType:"Temp"
 };
 HHStoredVars[HHStoredVarPrefixKey +"Temp_haremTeam"] =
+    {
+    storage:"sessionStorage",
+    HHType:"Temp"
+};
+HHStoredVars[HHStoredVarPrefixKey +"Temp_haremTeamScrolls"] =
+    {
+    storage:"sessionStorage",
+    HHType:"Temp"
+};
+HHStoredVars[HHStoredVarPrefixKey +"Temp_haremTeamSettings"] =
     {
     storage:"sessionStorage",
     HHType:"Temp"
