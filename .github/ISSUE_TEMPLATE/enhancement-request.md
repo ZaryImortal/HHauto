@@ -4,17 +4,23 @@ about: Suggest an enhancement of existing feature
 title: 'Enhancement : Feature to be enhanced'
 labels: enhancement
 assignees: ''
-
 ---
 
-**Which feature is concerned**
-A descripion of concerned feature to be enhanced.
+> **Important:** Please submit only one enhancement per issue. Do not mix enhancements with bug reports. This helps with tracking and prioritization.
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+**Game:** HH / GH / CxH / PSH
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+**Which feature is concerned?**
+Name or describe the existing feature.
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+**Current behavior**
+What does the feature do now?
+
+**Desired behavior**
+What should it do instead or additionally?
+
+**Why?**
+Why would this improvement be useful?
+
+**Screenshots / Additional context**
+Add any screenshots or context here.

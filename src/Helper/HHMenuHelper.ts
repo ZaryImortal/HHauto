@@ -1,9 +1,28 @@
+// HHMenuHelper.ts
+//
+// Builds and manages the HHAuto settings menu injected into the game page.
+// The menu is a floating panel (div#sMenu) with toggles, dropdowns, and
+// inputs for every automation feature. Responsibilities:
+//
+//   - Creating the menu toggle button and positioning it per page
+//   - Generating the full HTML menu with sections for each module
+//   - Reading user settings from inputs into storage (getMenuValues)
+//   - Writing stored settings back into inputs (setMenuValues)
+//   - Populating dynamic dropdowns (troll targets, league sort, labyrinth)
+//   - Masking sections that depend on disabled parent features
+//
+// Why one large class: The menu is tightly coupled to storage keys
+// (SK/TK) and input patterns. Splitting further would scatter the
+// HTML template across many files without real benefit.
+//
+// Used by: StartService (on init), AutoLoop (button state refresh)
+
 import { LabyrinthAuto } from '../Module/LabyrinthAuto';
 import { LeagueHelper } from '../Module/League';
 import { LoveRaidManager } from '../Module/index';
 import { setDefaults } from '../Service/index';
 import { isDisplayedHHPopUp, logHHAuto } from '../Utils/index';
-import { HHAuto_inputPattern, HHStoredVarPrefixKey, HHStoredVars } from '../config/index';
+import { HHAuto_inputPattern, HHStoredVarPrefixKey, HHStoredVars, SK, TK } from '../config/index';
 import { LoveRaid } from '../model/LoveRaid';
 import { ConfigHelper } from "./ConfigHelper";
 import { getTextForUI } from "./LanguageHelper";
@@ -261,7 +280,7 @@ export function switchHHMenuButton(isActive)
     var element = document.getElementById("sMenuButton");
     if(element !== null)
     {
-        if (getStoredValue(HHStoredVarPrefixKey+"Setting_master") === "false")
+        if (getStoredValue(HHStoredVarPrefixKey+SK.master) === "false")
         {
             element.style["background-color"] = "red";
             element.style["background-image"] = "none";
@@ -431,7 +450,7 @@ export function addEventsOnMenuItems()
 
 
 export function getMenu() {
-    const debugEnabled = getStoredValue(HHStoredVarPrefixKey+"Temp_Debug")==='true';
+    const debugEnabled = getStoredValue(HHStoredVarPrefixKey+TK.Debug)==='true';
     
     const getLeftColumn = () => {
         return `<div class="optionsColumn" style="min-width: 185px;">`
@@ -678,6 +697,18 @@ export function getMenu() {
                             + hhMenuSwitch('autoSeasonPassReds', '', true)
                             + hhMenuSwitch('autoSeasonBoostedOnly')
                             + hhMenuSwitch('autoSeasonSkipLowMojo')
+                            +`<div class="labelAndButton" style="width: 70px;">`
+                                +`<span class="HHMenuItemName">${getTextForUI("autoSeasonMaxTier","elementText")}</span>`
+                                +`<div class="tooltipHH">`
+                                    +`<span class="tooltipHHtext">${getTextForUI("autoSeasonMaxTier","tooltip")}</span>`
+                                    +`<label class="switch">`
+                                        +`<input id="autoSeasonMaxTier" type="checkbox">`
+                                        +`<span class="slider round">`
+                                        +`</span>`
+                                    +`</label>`
+                                    +`<input style="text-align:center; width:20px" id="autoSeasonMaxTierNb" required pattern="${HHAuto_inputPattern.autoSeasonMaxTierNb}" type="text">`
+                                +`</div>`
+                            +`</div>`
                         +`</div>`
                         +`<div class="internalOptionsRow">`
                             + hhMenuInputWithImg('autoSeasonThreshold', HHAuto_inputPattern.autoSeasonThreshold, 'text-align:center; width:30px', 'pictures/design/ic_kiss.png', 'numeric' )
@@ -751,6 +782,7 @@ export function getMenu() {
                     +`<div class="internalOptionsRow separator">`
                         + hhMenuSwitch('plusLoveRaid')
                         + hhMenuSelect('loveRaidSelector')
+                        + hhMenuSwitch('autoTrollLoveRaidByPassThreshold')
                         + hhMenuSwitch('buyLoveRaidCombat', '', true)
                         + hhMenuInput('autoBuyLoveRaidTrollNumber', HHAuto_inputPattern.autoBuyTrollNumber, 'width:40px')
                         + hhMenuSwitch('plusEventLoveRaidSandalWood')
@@ -857,6 +889,10 @@ export function getMenu() {
                         + hhMenuSwitchWithImg('autoBuyBoosters', 'design/ic_boosters_gray.svg', true)
                         + hhMenuInput('maxBooster', HHAuto_inputPattern.nWith1000sSeparator, 'text-align:right; width:45px')
                         + hhMenuInput('autoBuyBoostersFilter', HHAuto_inputPattern.autoBuyBoostersFilter, 'text-align:center; width:70px')
+                    +`</div>`
+                    +`<div class="internalOptionsRow">`
+                        + hhMenuSwitch('autoEquipBoosters')
+                        + hhMenuInput('autoEquipBoostersSlots', HHAuto_inputPattern.autoEquipBoostersSlots, 'text-align:center; width:70px')
                     +`</div>`
                     +`<div class="internalOptionsRow">`
                         + hhMenuSwitchWithImg('showMarketTools', 'design/menu/panel.svg')

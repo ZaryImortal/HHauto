@@ -1,17 +1,32 @@
+// HeroHelper.ts
+//
+// Provides read access to the player's hero data (class, level, money,
+// kobans) and actions that modify the hero: stat upgrades and booster
+// equipping. Hero data lives on the game's global `window.Hero` (or
+// `window.shared.Hero` on newer builds), accessed via unsafeWindow.
+//
+// Why stat upgrade logic lives here: Upgrading stats is a sequential,
+// recursive process (buy one increment, wait, repeat) that only touches
+// hero data. Keeping it next to the accessors avoids circular deps
+// with the Module layer.
+//
+// Used by: AutoLoop (stat upgrades on burst), Booster module (equip),
+//          BDSM simulator (hero stats for fight prediction)
+
 import { addNutakuSession, autoLoop } from '../Service/index';
 import { getHHAjax, isJSON, logHHAuto } from '../Utils/index';
-import { HHStoredVarPrefixKey } from '../config/index';
+import { HHStoredVarPrefixKey, SK, TK } from '../config/index';
 import { KKHero } from '../model/index';
 import { ConfigHelper } from './ConfigHelper';
 import { getHHVars } from "./HHHelper";
-import { getStoredValue, setStoredValue } from "./StorageHelper";
+import { getStoredJSON, getStoredValue, setStoredValue } from "./StorageHelper";
 import { randomInterval } from "./TimeHelper";
 
 export function getHero():KKHero
 {
     if(unsafeWindow.shared?.Hero === undefined)
     {
-        setTimeout(autoLoop, Number(getStoredValue(HHStoredVarPrefixKey+"Temp_autoLoopTimeMili")))
+        setTimeout(autoLoop, Number(getStoredValue(HHStoredVarPrefixKey+TK.autoLoopTimeMili)) || 1000);
         //logHHAuto(window.wrappedJSObject)
     }
     return unsafeWindow.shared?.Hero;
@@ -25,7 +40,7 @@ export function doStatUpgrades()
     var stats=[getHHVars('Hero.infos.carac1'),getHHVars('Hero.infos.carac2'),getHHVars('Hero.infos.carac3')];
     var money = HeroHelper.getMoney();
     var count=0;
-    var M=Number(getStoredValue(HHStoredVarPrefixKey+"Setting_autoStats"));
+    var M=Number(getStoredValue(HHStoredVarPrefixKey+SK.autoStats));
     var MainStat = stats[HeroHelper.getClass() -1];
     var Limit = HeroHelper.getLevel() * 30;//HeroHelper.getLevel()*19+Math.min(HeroHelper.getLevel(),25)*21;
     var carac = HeroHelper.getClass();
@@ -90,7 +105,7 @@ export class HeroHelper {
     }
 
     static haveBoosterInInventory(idBooster:string) {
-        const HaveBooster=isJSON(getStoredValue(HHStoredVarPrefixKey+"Temp_haveBooster"))?JSON.parse(getStoredValue(HHStoredVarPrefixKey+"Temp_haveBooster")):{};
+        const HaveBooster=getStoredJSON(HHStoredVarPrefixKey+TK.haveBooster, {});
         const boosterOwned = HaveBooster.hasOwnProperty(idBooster) ? Number(HaveBooster[idBooster]) : 0;
         return boosterOwned > 0
     }
@@ -106,7 +121,7 @@ export class HeroHelper {
             itemId = booster.id_item;
         }
         //action=market_equip_booster&id_item=316&type=booster
-        setStoredValue(HHStoredVarPrefixKey+"Temp_autoLoop", "false");
+        setStoredValue(HHStoredVarPrefixKey+TK.autoLoop, "false");
         logHHAuto("equipBooster: Equip "+booster.name+" (id_item="+itemId+"), setting autoloop to false");
         const params = {
             action: "market_equip_booster",
@@ -126,13 +141,13 @@ export class HeroHelper {
                     logHHAuto('equipBooster: Server returned success:false (may already be equipped)');
                     HeroHelper.getSandalWoodEquipFailure(true); // Increase failure
                 }
-                setStoredValue(HHStoredVarPrefixKey+"Temp_autoLoop", "true");
+                setStoredValue(HHStoredVarPrefixKey+TK.autoLoop, "true");
                 setTimeout(autoLoop,randomInterval(500,800));
                 logHHAuto(`equipBooster: resolving with ${data.success}`);
                 resolve(data.success);
             }, function (err){
                 logHHAuto('equipBooster: AJAX error callback - ' + err);
-                setStoredValue(HHStoredVarPrefixKey+"Temp_autoLoop", "true");
+                setStoredValue(HHStoredVarPrefixKey+TK.autoLoop, "true");
                 setTimeout(autoLoop,randomInterval(500,800));
                 HeroHelper.getSandalWoodEquipFailure(true); // Increase failure
                 logHHAuto('equipBooster: resolving with false');
@@ -145,11 +160,11 @@ export class HeroHelper {
     }
 
     static getSandalWoodEquipFailure(increase:boolean=false){
-        const numberFailureStr:string = getStoredValue(HHStoredVarPrefixKey+"Temp_sandalwoodFailure") ?? '0';
+        const numberFailureStr:string = getStoredValue(HHStoredVarPrefixKey+TK.sandalwoodFailure) ?? '0';
         let numberFailure = numberFailureStr ? Number(numberFailureStr): 0;
         if(isNaN(numberFailure)) numberFailure = 0;
         if(increase) numberFailure = numberFailure + 1;
-        setStoredValue(HHStoredVarPrefixKey+"Temp_sandalwoodFailure", numberFailure);
+        setStoredValue(HHStoredVarPrefixKey+TK.sandalwoodFailure, numberFailure);
         return numberFailure;
     }
 }
