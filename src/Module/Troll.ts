@@ -105,7 +105,13 @@ export class Troll {
 
     static isTrollFightActivated(){
         return Troll.isEnabled() &&
-        (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true" || getStoredValue(HHStoredVarPrefixKey + TK.autoTrollBattleSaveQuest) === "true")
+        (
+            getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true"
+            || getStoredValue(HHStoredVarPrefixKey + TK.autoTrollBattleSaveQuest) === "true"
+            || getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythic) === "true"
+            || getStoredValue(HHStoredVarPrefixKey + SK.plusEvent) === "true"
+            || LoveRaidManager.isAnyActivated()
+        )
     }
 
     static getLastTrollIdAvailable(logging = false, id_world: number = undefined): number {
@@ -169,7 +175,11 @@ export class Troll {
         const lastTrollIdAvailable = Troll.getLastTrollIdAvailable(logging);
         const eventGirl = EventModule.getEventGirl();
         const eventMythicGirl = EventModule.getEventMythicGirl();
-        const loveRaids:LoveRaid[] = LoveRaidManager.isActivated() ? LoveRaidManager.getTrollRaids() : [];
+        const allTrollRaids:LoveRaid[] = LoveRaidManager.isAnyActivated() ? LoveRaidManager.getTrollRaids() : [];
+        const minRaidStars = LoveRaidManager.getMinRaidStars();
+        const raidStarsRaids:LoveRaid[] = minRaidStars > 0 ? allTrollRaids.filter(raid => raid.girlGrade >= minRaidStars) : [];
+        // +Raid: user-selected girl bypasses grade filter, auto-mode ("first") respects it
+        const loveRaids:LoveRaid[] = LoveRaidManager.isActivated() ? allTrollRaids : [];
         if (debugEnabled && logging) {
             logHHAuto('eventGirl', eventGirl);
             logHHAuto('eventMythicGirl', eventMythicGirl);
@@ -180,11 +190,18 @@ export class Troll {
             if (logging) logHHAuto("Mythic Event troll fight");
             TTF = Troll.getTrollIdFromEvent(eventMythicGirl);
         }
+        else if (raidStarsRaids.length > 0){
+            if (logging) logHHAuto("Raid Stars troll fight (min grade " + minRaidStars + ")");
+            const loveRaid = LoveRaidManager.getRaidToFight(raidStarsRaids, logging);
+            if (loveRaid) {
+                TTF = loveRaid.trollId;
+            }
+        }
         else if (getStoredValue(HHStoredVarPrefixKey + SK.plusEvent) === "true" && !checkTimer("eventGoing") && eventGirl.girl_id && !eventGirl.is_mythic) {
             if (logging) logHHAuto("Event troll fight");
             TTF = Troll.getTrollIdFromEvent(eventGirl);
         }
-        else if (autoTrollSelectedIndex === 98 || autoTrollSelectedIndex === 99) {
+        else if (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true" && (autoTrollSelectedIndex === 98 || autoTrollSelectedIndex === 99)) {
             if (trollWithGirls === undefined || trollWithGirls.length === 0) {
                 if (logging) logHHAuto("No troll with girls from storage, parsing game info ...");
                 trollWithGirls = Troll.getTrollWithGirls();
@@ -219,20 +236,23 @@ export class Troll {
         }
         else if (LoveRaidManager.isActivated() && loveRaids.length > 0){
             const loveRaid = LoveRaidManager.getRaidToFight(loveRaids, logging);
-            TTF = loveRaid.trollId;
+            if (loveRaid) {
+                TTF = loveRaid.trollId;
+            }
         }
-        else if(autoTrollSelectedIndex > 0 && autoTrollSelectedIndex < 98)
+        else if(getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true" && autoTrollSelectedIndex > 0 && autoTrollSelectedIndex < 98)
         {
             TTF=autoTrollSelectedIndex;
             if (logging) logHHAuto("Custom troll fight.");
         }
-        else
+        else if(getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true")
         {
             TTF = lastTrollIdAvailable;
             if (logging) logHHAuto("Last troll fight: " + TTF);
         }
 
-        if (getStoredValue(HHStoredVarPrefixKey+TK.autoTrollBattleSaveQuest) === "true" && logging)
+        if (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true"
+            && getStoredValue(HHStoredVarPrefixKey+TK.autoTrollBattleSaveQuest) === "true" && logging)
         {
             TTF = lastTrollIdAvailable;
             logHHAuto("Last troll fight for quest item: " + TTF);
@@ -241,13 +261,32 @@ export class Troll {
         }
         const trollz = ConfigHelper.getHHScriptVars("trollzList");
         const sideTrollz = ConfigHelper.getHHScriptVars("sideTrollzList");
-        if (TTF <= 0) {
-            TTF = lastTrollIdAvailable > 0 ? lastTrollIdAvailable : 1;
-            if (logging) logHHAuto(`Error: wrong troll target found. Backup to ${TTF}`);
+
+        // Check if selected troll is actually unlocked (love raid girls can be on locked trolls)
+        if (TTF > 0 && TTF > lastTrollIdAvailable) {
+            logHHAuto(`Troll ${TTF} (${trollz[Number(TTF)]}) not unlocked (last available: ${lastTrollIdAvailable}), resetting raid selector to "Choose a girl".`);
+            setStoredValue(HHStoredVarPrefixKey + SK.autoLoveRaidSelectedIndex, "0");
+            TTF = 0;
         }
-        if (!trollz.hasOwnProperty(TTF) && !sideTrollz.hasOwnProperty(TTF)) {
+
+        if (TTF <= 0) {
+            if (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true") {
+                // Only fallback to last troll if normal troll fighting is enabled
+                TTF = lastTrollIdAvailable > 0 ? lastTrollIdAvailable : 1;
+                if (logging) logHHAuto(`Error: wrong troll target found. Backup to ${TTF}`);
+            } else {
+                // Events/Raids only mode — no target available, skip fight
+                if (logging) logHHAuto("No event/raid troll target available, skipping.");
+                return 0;
+            }
+        }
+        if (TTF > 0 && !trollz.hasOwnProperty(TTF) && !sideTrollz.hasOwnProperty(TTF)) {
             if (logging) logHHAuto("Error: New troll implemented '"+TTF+"' (List to be updated) or wrong troll target found");
-            TTF = 1;
+            if (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true") {
+                TTF = 1;
+            } else {
+                return 0;
+            }
         }
         return TTF;
     }
@@ -266,7 +305,7 @@ export class Troll {
         {
             const eventGirl = EventModule.getEventGirl();
             const eventMythicGirl = EventModule.getEventMythicGirl();
-            const loveRaid = LoveRaidManager.getRaidToFight(LoveRaidManager.getTrollRaids(), false);
+            const loveRaid = LoveRaidManager.isAnyActivated() ? LoveRaidManager.getRaidToFight(LoveRaidManager.getTrollRaids(), false) : undefined;
             //logHHAuto("No power for battle.");
             if (
                 !Troll.canBuyFight(eventGirl).canBuy && !Troll.canBuyFight(eventMythicGirl).canBuy &&
@@ -286,28 +325,37 @@ export class Troll {
         const currentPage = getPage();
 
         if (!TTF || TTF <= 0) {
-            if (getStoredValue(HHStoredVarPrefixKey + TK.TrollInvalid) === "true") {
-                logHHAuto(`ERROR: Invalid troll N°${TTF}, again, going to first troll`);
-                TTF = 1;
-            }else {
-                logHHAuto(`ERROR: Invalid troll N°${TTF}, do not fight, retry...`);
-                setStoredValue(HHStoredVarPrefixKey + TK.TrollInvalid, "true");
-                return true;
+            if (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true") {
+                if (getStoredValue(HHStoredVarPrefixKey + TK.TrollInvalid) === "true") {
+                    logHHAuto(`ERROR: Invalid troll N°${TTF}, again, going to first troll`);
+                    TTF = 1;
+                } else {
+                    logHHAuto(`ERROR: Invalid troll N°${TTF}, do not fight, retry...`);
+                    setStoredValue(HHStoredVarPrefixKey + TK.TrollInvalid, "true");
+                    return true;
+                }
+            } else {
+                logHHAuto("No troll target found (events/raids only mode), skipping fight.");
+                return false;
             }
         }
 
-        if (Booster.needSandalWoodEquipped(TTF))
+        const needSW = Booster.needSandalWoodEquipped(TTF);
+        logHHAuto(`[SW-DEBUG] Troll fight entry: TTF=${TTF}, needSandalWoodEquipped=${needSW}, currentPage=${currentPage}`);
+        if (needSW)
         {
             if (currentPage !== ConfigHelper.getHHScriptVars("pagesIDShop")) {
-                logHHAuto('Go to Shop page to update booster status');
+                logHHAuto('[SW-DEBUG] Go to Shop page to update booster status');
                 gotoPage(ConfigHelper.getHHScriptVars("pagesIDShop"));
                 return true;
             } else {
-                logHHAuto('Updating booster status');
+                logHHAuto('[SW-DEBUG] On shop page, collecting boosters from market');
                 Booster.collectBoostersFromMarket();
+                logHHAuto('[SW-DEBUG] Attempting to equip Sandalwood...');
                 const equipped = await Booster.equipeSandalWoodIfNeeded(TTF);
+                logHHAuto(`[SW-DEBUG] equipeSandalWoodIfNeeded returned: ${equipped}`);
                 if(equipped) {
-                    logHHAuto('Updating booster status after new booster equipped before fight');
+                    logHHAuto('[SW-DEBUG] Sandalwood newly equipped, refreshing booster status from market');
                     Booster.collectBoostersFromMarket();
                 }
             }
@@ -321,7 +369,7 @@ export class Troll {
         if (currentPage === ConfigHelper.getHHScriptVars("pagesIDTrollPreBattle") && window.location.search.includes("id_opponent=" + TTF))
         {
             // On the battle screen.
-            Troll.CrushThemFights();
+            await Troll.CrushThemFights();
             return true;
         }
         else
@@ -337,7 +385,7 @@ export class Troll {
         }
     }
 
-    static CrushThemFights()
+    static async CrushThemFights()
     {
         if (getPage() === ConfigHelper.getHHScriptVars("pagesIDTrollPreBattle")) {
             // On battle page.
@@ -434,8 +482,9 @@ export class Troll {
                     return true;
                 }
 
-                if (LoveRaidManager.isActivated()) {
-                    loveRaid = LoveRaidManager.getTrollRaids().find(raid => raid.trollId === TTF);
+                if (LoveRaidManager.isAnyActivated()) {
+                    const trollRaids = LoveRaidManager.getTrollRaids();
+                    loveRaid = trollRaids.find(raid => raid.trollId === TTF);
                     if (loveRaid && (rewardGirlz.length === 0 || !trollGirlRewards.includes('"id_girl":' + loveRaid.id_girl))) {
                         logHHAuto(`Seems girl ${loveRaid.id_girl} is no more available at troll ${trollz[Number(TTF)]}. Going to love Raid.`);
                         clearTimer('nextLoveRaidTime');
@@ -494,6 +543,23 @@ export class Troll {
                         )
                     );
 
+                    // Sandalwood batch-sizing: compute recommended batch based on doses + shards
+                    const dosesRemaining = Booster.getSandalwoodDosesRemaining();
+                    logHHAuto(`[SW-DEBUG] CrushThemFights: eventShards=${remainingEventShards}, raidShards=${remainingLoveRaidShards}, totalRemaining=${remainingShards}, dosesRemaining=${dosesRemaining}, isMythic=${eventTrollGirl?.is_mythic}, power=${currentPower}`);
+                    const recommendedBatch = Booster.getRecommendedBatchSize(
+                        Math.min(remainingEventShards || 100, remainingLoveRaidShards || 100),
+                        dosesRemaining,
+                        {
+                            useX50: getStoredValue(HHStoredVarPrefixKey+SK.useX50Fights) === "true",
+                            useX10: getStoredValue(HHStoredVarPrefixKey+SK.useX10Fights) === "true",
+                            sandalwoodShardsX10Limit: Number(getStoredValue(HHStoredVarPrefixKey+SK.sandalwoodShardsX10Limit)) || 80,
+                            sandalwoodShardsX1Limit: Number(getStoredValue(HHStoredVarPrefixKey+SK.sandalwoodShardsX1Limit)) || 95,
+                            sandalwoodDosesX10Limit: Number(getStoredValue(HHStoredVarPrefixKey+SK.sandalwoodDosesX10Limit)) || 6,
+                            sandalwoodDosesX1Limit: Number(getStoredValue(HHStoredVarPrefixKey+SK.sandalwoodDosesX1Limit)) || 3,
+                        }
+                    );
+                    logHHAuto(`[SW-DEBUG] CrushThemFights: recommendedBatch=${recommendedBatch}`);
+
                     const minShardsx50 = getStoredValue(HHStoredVarPrefixKey + SK.minShardsX50);
                     if (getStoredValue(HHStoredVarPrefixKey+SK.useX50Fights) === "true"
                         && minShardsx50 && Number.isInteger(Number(minShardsx50)) && remainingShards >= Number(minShardsx50)
@@ -503,6 +569,7 @@ export class Troll {
                             || bypassThreshold
                         )
                         && (eventTrollGirl?.is_mythic || getStoredValue(HHStoredVarPrefixKey+SK.useX50FightsAllowNormalEvent) === "true")
+                        && recommendedBatch >= 50
                     )
                     {
                         logHHAuto("Going to crush 50 times: "+trollz[Number(TTF)]+' for '+battleButtonX50Price+' kobans.');
@@ -510,6 +577,7 @@ export class Troll {
                         setHHVars('Hero.infos.hc_confirm',true);
                         // We have the power.
                         //replaceCheatClick();
+                        Booster.resetBattleResponseFlag();
                         battleButtonX50[0].click();
                         setHHVars('Hero.infos.hc_confirm',hcConfirmValue);
                         //setStoredValue(HHStoredVarPrefixKey+TK.EventFightsBeforeRefresh", Number(getStoredValue(HHStoredVarPrefixKey+TK.EventFightsBeforeRefresh")) - 50);
@@ -519,13 +587,17 @@ export class Troll {
                             setStoredValue(HHStoredVarPrefixKey+TK.questRequirement, "none");
                         }
                         RewardHelper.ObserveAndGetGirlRewards();
+                        logHHAuto('[SW-DEBUG] x50: waiting for battle response...');
+                        await Booster.waitForBattleResponse();
+                        logHHAuto('[SW-DEBUG] x50: battle response received, done');
                         return;
                     }
                     else
                     {
                         if (getStoredValue(HHStoredVarPrefixKey+SK.useX50Fights) === "true")
                         {
-                            logHHAuto(`Unable to use x50 for ${battleButtonX50Price} kobans,fights : ${Troll.getEnergy()}/50, remaining shards : ${remainingShards}/${getStoredValue(HHStoredVarPrefixKey + SK.minShardsX50)}, kobans : ${HeroHelper.getKoban()}/${Number(getStoredValue(HHStoredVarPrefixKey + SK.kobanBank))}`);
+                            const x50BlockedBy = recommendedBatch < 50 ? ` (SW batch cap: ${recommendedBatch})` : '';
+                            logHHAuto(`Unable to use x50 for ${battleButtonX50Price} kobans,fights : ${Troll.getEnergy()}/50, remaining shards : ${remainingShards}/${getStoredValue(HHStoredVarPrefixKey + SK.minShardsX50)}, kobans : ${HeroHelper.getKoban()}/${Number(getStoredValue(HHStoredVarPrefixKey + SK.kobanBank))}${x50BlockedBy}`);
                         }
                     }
 
@@ -538,6 +610,7 @@ export class Troll {
                             || bypassThreshold
                         )
                         && (eventTrollGirl?.is_mythic || getStoredValue(HHStoredVarPrefixKey+SK.useX10FightsAllowNormalEvent) === "true")
+                        && recommendedBatch >= 10
                     )
                     {
                         logHHAuto(`Going to crush 10 times: ${trollz[Number(TTF)]} for ${battleButtonX10Price} kobans.`);
@@ -545,6 +618,7 @@ export class Troll {
                         setHHVars('Hero.infos.hc_confirm',true);
                         // We have the power.
                         //replaceCheatClick();
+                        Booster.resetBattleResponseFlag();
                         battleButtonX10[0].click();
                         setHHVars('Hero.infos.hc_confirm',hcConfirmValue);
                         //setStoredValue(HHStoredVarPrefixKey+TK.EventFightsBeforeRefresh", Number(getStoredValue(HHStoredVarPrefixKey+TK.EventFightsBeforeRefresh")) - 10);
@@ -554,13 +628,17 @@ export class Troll {
                             setStoredValue(HHStoredVarPrefixKey+TK.questRequirement, "none");
                         }
                         RewardHelper.ObserveAndGetGirlRewards();
+                        logHHAuto('[SW-DEBUG] x10: waiting for battle response...');
+                        await Booster.waitForBattleResponse();
+                        logHHAuto('[SW-DEBUG] x10: battle response received, done');
                         return;
                     }
                     else
                     {
                         if (getStoredValue(HHStoredVarPrefixKey+SK.useX10Fights) === "true")
                         {
-                            logHHAuto(`Unable to use x10 for ${battleButtonX10Price} kobans,fights : ${Troll.getEnergy()}/10, remaining shards : ${remainingShards}/${getStoredValue(HHStoredVarPrefixKey + SK.minShardsX10)}, kobans : ${HeroHelper.getKoban()}/${Number(getStoredValue(HHStoredVarPrefixKey + SK.kobanBank))}`);
+                            const x10BlockedBy = recommendedBatch < 10 ? ` (SW batch cap: ${recommendedBatch})` : '';
+                            logHHAuto(`Unable to use x10 for ${battleButtonX10Price} kobans,fights : ${Troll.getEnergy()}/10, remaining shards : ${remainingShards}/${getStoredValue(HHStoredVarPrefixKey + SK.minShardsX10)}, kobans : ${HeroHelper.getKoban()}/${Number(getStoredValue(HHStoredVarPrefixKey + SK.kobanBank))}${x10BlockedBy}`);
                         }
                     }
                 }
@@ -754,7 +832,7 @@ export class Troll {
         {
             if (
                     getStoredValue(HHStoredVarPrefixKey +SK.buyLoveRaidCombat) =="true"
-                    && getStoredValue(HHStoredVarPrefixKey +SK.plusLoveRaid) ==="true"
+                    && LoveRaidManager.isAnyActivated()
                     && raid.seconds_until_event_end > 0 // new Date() < new Date(raid.end_datetime)
                     && raid.id_girl
                 )

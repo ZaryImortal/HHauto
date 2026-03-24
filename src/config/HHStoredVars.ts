@@ -1224,6 +1224,61 @@ HHStoredVars[HHStoredVarPrefixKey + SK.minShardsX50] =
     menuType:"value",
     kobanUsing:false
 };
+HHStoredVars[HHStoredVarPrefixKey + SK.sandalwoodShardsX10Limit] =
+    {
+    default:"80",
+    storage:"Storage()",
+    HHType:"Setting",
+    valueType:"Small Integer",
+    getMenu:true,
+    setMenu:true,
+    menuType:"value",
+    kobanUsing:false
+};
+HHStoredVars[HHStoredVarPrefixKey + SK.sandalwoodShardsX1Limit] =
+    {
+    default:"95",
+    storage:"Storage()",
+    HHType:"Setting",
+    valueType:"Small Integer",
+    getMenu:true,
+    setMenu:true,
+    menuType:"value",
+    kobanUsing:false
+};
+HHStoredVars[HHStoredVarPrefixKey + SK.sandalwoodDosesX10Limit] =
+    {
+    default:"6",
+    storage:"Storage()",
+    HHType:"Setting",
+    valueType:"Small Integer",
+    getMenu:true,
+    setMenu:true,
+    menuType:"value",
+    kobanUsing:false
+};
+HHStoredVars[HHStoredVarPrefixKey + SK.sandalwoodDosesX1Limit] =
+    {
+    default:"3",
+    storage:"Storage()",
+    HHType:"Setting",
+    valueType:"Small Integer",
+    getMenu:true,
+    setMenu:true,
+    menuType:"value",
+    kobanUsing:false
+};
+HHStoredVars[HHStoredVarPrefixKey + TK.sandalwoodMaxUsages] =
+    {
+    default:"11",
+    storage:"sessionStorage",
+    HHType:"Temp",
+    valueType:"Small Integer",
+    getMenu:false,
+    setMenu:false,
+    menuType:"value",
+    kobanUsing:false
+};
 HHStoredVars[HHStoredVarPrefixKey + SK.updateMarket] =
     {
     default:"true",
@@ -1266,6 +1321,17 @@ HHStoredVars[HHStoredVarPrefixKey + SK.paranoiaSpendsBefore] =
     menuType:"checked",
     kobanUsing:false
 };
+HHStoredVars[HHStoredVarPrefixKey + SK.plusGirlSkins] =
+{
+    default:"false",
+    storage:"Storage()",
+    HHType:"Setting",
+    valueType:"Boolean",
+    getMenu:true,
+    setMenu:true,
+    menuType:"checked",
+    kobanUsing:false
+};
 HHStoredVars[HHStoredVarPrefixKey + SK.autoTrollLoveRaidByPassThreshold] =
     {
     default:"false",
@@ -1276,6 +1342,19 @@ HHStoredVars[HHStoredVarPrefixKey + SK.autoTrollLoveRaidByPassThreshold] =
     setMenu:true,
     menuType:"checked",
     kobanUsing:false
+};
+HHStoredVars[HHStoredVarPrefixKey + SK.plusLoveRaidMythic] =
+    {
+    default:"0",
+    storage:"Storage()",
+    HHType:"Setting",
+    valueType:"Small Integer",
+    customMenuID:"raidStarsSelector",
+    getMenu:true,
+    setMenu:true,
+    menuType:"value",
+    kobanUsing:false,
+    isValid: /^[0356]$/
 };
 HHStoredVars[HHStoredVarPrefixKey + SK.plusLoveRaid] =
     {
@@ -1304,7 +1383,7 @@ HHStoredVars[HHStoredVarPrefixKey + SK.autoLoveRaidSelectedIndex] =
     menuType: "value",
     kobanUsing: false,
     customMenuID: "loveRaidSelector",
-    isValid: /^[0-9]|1[0-5]$/
+    isValid: /^(0|first|\d+_\d+)$/
 };
 HHStoredVars[HHStoredVarPrefixKey + SK.buyLoveRaidCombat] =
 {
@@ -1351,6 +1430,17 @@ HHStoredVars[HHStoredVarPrefixKey + SK.plusEvent] =
     kobanUsing:false
 };
 HHStoredVars[HHStoredVarPrefixKey + SK.plusEventMythic] =
+    {
+    default:"false",
+    storage:"Storage()",
+    HHType:"Setting",
+    valueType:"Boolean",
+    getMenu:true,
+    setMenu:true,
+    menuType:"checked",
+    kobanUsing:false
+};
+HHStoredVars[HHStoredVarPrefixKey + SK.plusEventSandalWood] =
     {
     default:"false",
     storage:"Storage()",
@@ -2449,4 +2539,35 @@ HHStoredVars[HHStoredVarPrefixKey + TK.trollPoints] =
     {
     storage:"sessionStorage",
     HHType:"Temp"
+};
+// Survey
+HHStoredVars[HHStoredVarPrefixKey + TK.surveyShown] =
+    {
+    default: "0",
+    storage: "localStorage",
+    HHType: "Temp"
+};
+HHStoredVars[HHStoredVarPrefixKey + TK.surveyDismissCount] =
+    {
+    default: "0",
+    storage: "localStorage",
+    HHType: "Temp"
+};
+HHStoredVars[HHStoredVarPrefixKey + TK.surveyLastHash] =
+    {
+    storage: "localStorage",
+    HHType: "Temp"
+};
+// Feature Popup (What's New)
+HHStoredVars[HHStoredVarPrefixKey + TK.featurePopupShown] =
+    {
+    default: "0",
+    storage: "localStorage",
+    HHType: "Temp"
+};
+HHStoredVars[HHStoredVarPrefixKey + TK.featurePopupDismissCount] =
+    {
+    default: "0",
+    storage: "localStorage",
+    HHType: "Temp"
 };

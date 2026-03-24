@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HaremHeroes Automatic++
 // @namespace    https://github.com/Roukys/HHauto
-// @version      7.31.1
+// @version      7.33.2
 // @description  Open the menu in HaremHeroes(topright) to toggle AutoControlls. Supports AutoSalary, AutoContest, AutoMission, AutoQuest, AutoTrollBattle, AutoArenaBattle and AutoPachinko(Free), AutoLeagues, AutoChampions and AutoStatUpgrades. Messages are printed in local console.
 // @author       JD and Dorten(a bit), Roukys, cossname, YotoTheOne, CLSchwab, deuxge, react31, PrimusVox, OldRon1977, tsokh, UncleBob800
 // @match        http*://*.haremheroes.com/*
@@ -17,6 +17,8 @@
 // @grant        GM_addStyle
 // @grant        GM_registerMenuCommand
 // @grant        GM_unregisterMenuCommand
+// @grant        GM_xmlhttpRequest
+// @grant        GM_setClipboard
 // @license      MIT
 // @updateURL    https://github.com/Roukys/HHauto/raw/main/HHAuto.user.js
 // @downloadURL  https://github.com/Roukys/HHauto/raw/main/HHAuto.user.js
@@ -236,16 +238,24 @@ HHAuto_ToolTips.en['autoBuyMythicTrollNumber'] = { version: "6.1.0", elementText
 HHAuto_ToolTips.en['firstTrollWithGirls'] = { version: "5.32.0", elementText: "First troll with girl" };
 HHAuto_ToolTips.en['lastTrollWithGirls'] = { version: "5.32.0", elementText: "Last troll with girl" };
 HHAuto_ToolTips.en['autoChampsForceStartEventGirl'] = { version: "5.6.98", elementText: "Event force", tooltip: "if enabled, will fight for event girl champion even if not started. Champions will need to be activated and champions to be in the filter." };
-HHAuto_ToolTips.en['plusLoveRaid'] = { version: "7.25.0", elementText: "+Raid", tooltip: "If enabled : ignore selected troll when raid Of Love available, done AFTER events and after last/first troll with girls option" };
-HHAuto_ToolTips.en['loveRaidSelector'] = { version: "7.25.6", elementText: "Raid selector", tooltip: "Select girl to be targetted during Love Raid, Will be reset to first option when girl won or event ends." };
-HHAuto_ToolTips.en['autoTrollLoveRaidByPassThreshold'] = { version: "7.30.6", elementText: "Bypass reserve", tooltip: "When enabled, Love Raid fights will bypass the fight reserve (threshold) as long as a raid girl is available — same behavior as Mythic events." };
+HHAuto_ToolTips.en['plusLoveRaid'] = { version: "7.32.1", elementText: "+Raid", tooltip: "Fight Love Raids independently from Auto Troll and Events.<br>Raids are prioritized after Events but before normal Trolls." };
+HHAuto_ToolTips.en['loveRaidSelector'] = { version: "7.32.5", elementText: "Raid selector", tooltip: "Select girl to be targeted during Love Raid.<br>Resets to 'Choose a girl' when girl is won (and skins are done or +Girl Skins is OFF)." };
+HHAuto_ToolTips.en['plusGirlSkins'] = { version: "7.32.5", elementText: "+Girl Skins", tooltip: "Continue fighting after girl shards are complete to collect girl skins.<br>Applies to both Events and Raids.<br>When OFF: stops fighting once girl is won (100 shards).<br>When ON: continues if skin shards are still available." };
+HHAuto_ToolTips.en['autoTrollLoveRaidByPassThreshold'] = { version: "7.32.1", elementText: "Bypass reserve", tooltip: "Bypass energy threshold for +Raid fights as long as a raid girl is available." };
+HHAuto_ToolTips.en['raidStarsSelector'] = { version: "7.32.3", elementText: "+Raid Stars", tooltip: "Fight Love Raids by minimum girl grade. Independent from +Raid and Auto Troll.<br>Raids matching the selected grade are claimed by +Raid Stars; remaining raids go to +Raid (if enabled).<br>Bypasses energy threshold like +Mythic Event." };
+HHAuto_ToolTips.en['raidStarsOff'] = { version: "7.32.3", elementText: "Off" };
+HHAuto_ToolTips.en['raidStars3'] = { version: "7.32.3", elementText: "≥3 ★★★" };
+HHAuto_ToolTips.en['raidStars5'] = { version: "7.32.3", elementText: "≥5 ★★★★★" };
+HHAuto_ToolTips.en['raidStars6'] = { version: "7.32.3", elementText: "6 ★★★★★★" };
 HHAuto_ToolTips.en['buyLoveRaidCombat'] = { version: "7.25.6", elementText: "Buy comb.for Raid", tooltip: "<p style = 'color:red'>/ !\\ Kobans spending function /!\\<br>(" + HHAuto_ToolTips.en['spendKobans0'].elementText + " must be ON)</p > If enabled: <br>Buying combat point during Love Raid event (if not going under Koban bank value), this will bypass threshold if event girl shards available." };
 HHAuto_ToolTips.en['autoBuyLoveRaidTrollNumber'] = { version: "7.25.6", elementText: "Raid auto buy", tooltip: "Number of combat points to be bought during an love raid event" };
 HHAuto_ToolTips.en['plusEventLoveRaidSandalWood'] = { version: "7.25.8", elementText: "Equip Sandalwood", tooltip: "Will equip sandalwood before LoveRaid fight if enough in inventory<br>Do not equip if less than 10 shards to win<br>Will not buy any." };
+HHAuto_ToolTips.en['chooseARaid'] = { version: "7.32.5", elementText: "Choose a girl" };
 HHAuto_ToolTips.en['firstEndingRaid'] = { version: "7.25.6", elementText: "First ending raid" };
 HHAuto_ToolTips.en['loveRaidTitle'] = { version: "7.25.5", elementText: "Love Raid" };
-HHAuto_ToolTips.en['plusEvent'] = { version: "5.6.24", elementText: "+Event", tooltip: "If enabled : ignore selected troll during event to battle event" };
-HHAuto_ToolTips.en['plusEventMythic'] = { version: "5.6.24", elementText: "+Mythic Event", tooltip: "Enable grabbing girls for mythic event, should only play them when shards are available, Mythic girl troll will be priorized over Event Troll." };
+HHAuto_ToolTips.en['plusEvent'] = { version: "7.32.1", elementText: "+Event", tooltip: "Fight regular event trolls independently from Auto Troll.<br>Respects energy threshold." };
+HHAuto_ToolTips.en['plusEventMythic'] = { version: "7.32.1", elementText: "+Mythic Event", tooltip: "Fight mythic event trolls independently from Auto Troll.<br>Bypasses energy threshold. Prioritized over regular events." };
+HHAuto_ToolTips.en['plusEventSandalWood'] = { version: "7.32.1", elementText: "Equip Sandalwood", tooltip: "Will equip sandalwood before event fight if enough in inventory<br>Do not equip if less than 10 shards to win<br>Will not buy any." };
 HHAuto_ToolTips.en['plusEventMythicSandalWood'] = { version: "7.2.0", elementText: "Equip Sandalwood", tooltip: "Will equip sandalwood before mythic fight if enough in inventory<br>Do not equip if less than 10 shards to win<br>Will not buy any." };
 HHAuto_ToolTips.en['eventCompleted'] = { version: "7.1.3", elementText: "Event completed", tooltip: "Event completed" };
 //HHAuto_ToolTips.en['eventMythicPrio'] = { version: "5.6.24", elementText: "Priorize over Event Troll Order", tooltip: "Mythic event girl priorized over event troll order if shards available"};
@@ -432,6 +442,10 @@ HHAuto_ToolTips.en['useX50FightsAllowNormalEvent'] = { version: "5.6.24", elemen
 HHAuto_ToolTips.en['autoBuy'] = { version: "5.6.24", elementText: "Market" };
 HHAuto_ToolTips.en['minShardsX50'] = { version: "5.6.24", elementText: "Min. shards x50", tooltip: "Only use x50 button if remaining shards of current girl is equal or above this limit." };
 HHAuto_ToolTips.en['minShardsX10'] = { version: "5.6.24", elementText: "Min. shards x10", tooltip: "Only use x10 button if remaining shards of current girl is equal or above this limit." };
+HHAuto_ToolTips.en['sandalwoodShardsX10Limit'] = { version: "7.33.0", elementText: "SW shards x10 limit", tooltip: "When collected shards reach this percentage, downgrade from x50 to x10 battles to avoid wasting Sandalwood doses." };
+HHAuto_ToolTips.en['sandalwoodShardsX1Limit'] = { version: "7.33.0", elementText: "SW shards x1 limit", tooltip: "When collected shards reach this percentage, downgrade from x10 to x1 battles to avoid wasting Sandalwood doses." };
+HHAuto_ToolTips.en['sandalwoodDosesX10Limit'] = { version: "7.33.0", elementText: "SW doses x10 limit", tooltip: "When remaining Sandalwood doses drop to this number or below, downgrade from x50 to x10 battles." };
+HHAuto_ToolTips.en['sandalwoodDosesX1Limit'] = { version: "7.33.0", elementText: "SW doses x1 limit", tooltip: "When remaining Sandalwood doses drop to this number or below, downgrade from x10 to x1 battles." };
 HHAuto_ToolTips.en['mythicGirlNext'] = { version: "5.6.24", elementText: "Mythic girl wave" };
 HHAuto_ToolTips.en['RefreshOppoList'] = { version: "5.6.24", elementText: "Refresh Opponent list", tooltip: "Allow to force a refresh of opponent list." };
 HHAuto_ToolTips.en['HideBeatenOppo'] = { version: "5.7.1", elementText: "Hide", tooltip: "Allow to hide beaten opponent from the list." };
@@ -473,6 +487,7 @@ HHAuto_ToolTips.en['ExportGirlsData'] = { version: "5.6.24", elementText: "⤓",
 HHAuto_ToolTips.en['autoFreeBundlesCollect'] = { version: "5.16.0", elementText: "Collect free bundles", tooltip: "Collect free bundles." };
 HHAuto_ToolTips.en['mousePause'] = { version: "5.6.135", elementText: "Mouse Pause", tooltip: "Pause script activity for 5 seconds when mouse movement is detected. Helps stop script from interrupting manual actions. (in ms, 5000ms=5s)" };
 HHAuto_ToolTips.en['saveDefaults'] = { version: "5.6.24", elementText: "Save defaults", tooltip: "Save your own defaults values for new tabs." };
+HHAuto_ToolTips.en['settingsSurvey'] = { version: "7.33.1", elementText: "Settings Survey", tooltip: "Share your settings anonymously to help us identify unused features." };
 HHAuto_ToolTips.en['autoGiveAff'] = { version: "5.6.24", elementText: "Auto Give", tooltip: "If enabled, will automatically give Aff to girls in order ( you can use OCD script to filter )." };
 HHAuto_ToolTips.en['autoGiveExp'] = { version: "5.6.24", elementText: "Auto Give", tooltip: "If enabled, will automatically give Exp to girls in order ( you can use OCD script to filter )." };
 HHAuto_ToolTips.en['autoPantheonTitle'] = { version: "5.6.24", elementText: "Pantheon", tooltip: "" };
@@ -655,6 +670,10 @@ HHAuto_ToolTips.fr['useX50Fights'] = { version: "5.6.24", elementText: "Combats 
 HHAuto_ToolTips.fr['autoBuy'] = { version: "5.6.24", elementText: "Marché" };
 HHAuto_ToolTips.fr['minShardsX50'] = { version: "5.6.24", elementText: "Frags min. x50", tooltip: "Utiliser le bouton x50 si le nombre de fragments restant est supérieur ou égal à..." };
 HHAuto_ToolTips.fr['minShardsX10'] = { version: "5.6.24", elementText: "Frags min. x10", tooltip: "Utiliser le bouton x10 si le nombre de fragments restant est supérieur ou égal à..." };
+HHAuto_ToolTips.fr['sandalwoodShardsX10Limit'] = { version: "7.33.0", elementText: "SW frags x10 limite", tooltip: "Quand les fragments collectés atteignent ce pourcentage, réduire de x50 à x10 combats pour éviter le gaspillage de doses Sandalwood." };
+HHAuto_ToolTips.fr['sandalwoodShardsX1Limit'] = { version: "7.33.0", elementText: "SW frags x1 limite", tooltip: "Quand les fragments collectés atteignent ce pourcentage, réduire de x10 à x1 combats pour éviter le gaspillage de doses Sandalwood." };
+HHAuto_ToolTips.fr['sandalwoodDosesX10Limit'] = { version: "7.33.0", elementText: "SW doses x10 limite", tooltip: "Quand les doses Sandalwood restantes descendent à ce nombre ou en dessous, réduire de x50 à x10 combats." };
+HHAuto_ToolTips.fr['sandalwoodDosesX1Limit'] = { version: "7.33.0", elementText: "SW doses x1 limite", tooltip: "Quand les doses Sandalwood restantes descendent à ce nombre ou en dessous, réduire de x10 à x1 combats." };
 HHAuto_ToolTips.fr['autoMissionKFirst'] = { version: "5.6.24", elementText: "Prioriser Kobans", tooltip: "Si activé : commence par les missions qui rapportent des kobans." };
 HHAuto_ToolTips.fr['povpogTitle'] = { version: "5.6.133", elementText: "Voie de la Valeur/Gloire" };
 HHAuto_ToolTips.fr['skills'] = { version: "7.16.0", elementText: "Compétences" };
@@ -1096,10 +1115,58 @@ const DEFAULT_BOOSTERS = { normal: [], mythic: [] };
  * All methods are static. Booster state lives in browser storage, not on the class instance.
  */
 class Booster {
+    /**
+     * Waits for the AJAX battle response to be processed.
+     * If the response already arrived (flag set), returns immediately.
+     * Otherwise creates a Promise with 10s timeout.
+     */
+    static waitForBattleResponse() {
+        if (Booster._battleResponseReady) {
+            Booster._battleResponseReady = false;
+            LogUtils_logHHAuto('[SW-DEBUG] waitForBattleResponse: flag was already set, returning immediately');
+            return Promise.resolve();
+        }
+        LogUtils_logHHAuto('[SW-DEBUG] waitForBattleResponse: waiting for AJAX response (10s timeout)...');
+        return new Promise((resolve, reject) => {
+            Booster._battleResponseResolve = resolve;
+            setTimeout(() => {
+                if (Booster._battleResponseResolve === resolve) {
+                    Booster._battleResponseResolve = null;
+                    LogUtils_logHHAuto('[SW-DEBUG] waitForBattleResponse: TIMED OUT after 10s — proceeding anyway');
+                    resolve(); // resolve anyway to avoid blocking
+                }
+            }, 10000);
+        });
+    }
+    /**
+     * Resets the battle response flag and resolver. Must be called BEFORE each battle button click.
+     */
+    static resetBattleResponseFlag() {
+        LogUtils_logHHAuto('[SW-DEBUG] resetBattleResponseFlag: clearing flag and resolver before battle click');
+        Booster._battleResponseReady = false;
+        Booster._battleResponseResolve = null;
+    }
+    /**
+     * Called at the end of the AJAX handler after processing battle results.
+     * Either resolves a waiting promise or sets the flag for future waitForBattleResponse() calls.
+     */
+    static notifyBattleResponseProcessed() {
+        if (Booster._battleResponseResolve) {
+            LogUtils_logHHAuto('[SW-DEBUG] notifyBattleResponseProcessed: resolver waiting → resolving promise now');
+            const resolve = Booster._battleResponseResolve;
+            Booster._battleResponseResolve = null;
+            resolve();
+        }
+        else {
+            LogUtils_logHHAuto('[SW-DEBUG] notifyBattleResponseProcessed: no resolver waiting → setting flag for later');
+            Booster._battleResponseReady = true;
+        }
+    }
     //all following lines credit:Tom208 OCD script
     static collectBoostersFromAjaxResponses() {
         onAjaxResponse(/(action|class)/, (response, opt, xhr, evt) => {
-            setTimeout(function () {
+            (function () {
+                var _a, _b, _c;
                 return __awaiter(this, void 0, void 0, function* () {
                     const boosterStatus = Booster.getBoosterFromStorage();
                     const searchParams = new URLSearchParams(opt.data);
@@ -1118,6 +1185,11 @@ class Booster {
                             const clonedData = Object.assign({}, boosterData);
                             if (isMythic) {
                                 boosterStatus.mythic.push(clonedData);
+                                // Track max usages for Sandalwood on equip
+                                if (((_a = clonedData.item) === null || _a === void 0 ? void 0 : _a.identifier) === 'MB1' && clonedData.usages_remaining != null) {
+                                    setStoredValue(HHStoredVarPrefixKey + TK.sandalwoodMaxUsages, String(clonedData.usages_remaining));
+                                    LogUtils_logHHAuto(`[SW-DEBUG] Sandalwood equipped via AJAX: usages_remaining=${clonedData.usages_remaining}, saved to TK.sandalwoodMaxUsages`);
+                                }
                             }
                             else {
                                 boosterStatus.normal.push(Object.assign(Object.assign({}, clonedData), { endAt: clonedData.lifetime }));
@@ -1161,20 +1233,39 @@ class Booster {
                     });
                     if (sandalwood && action === 'do_battles_trolls') {
                         const isMultibattle = parseInt(number_of_battles || '') > 1;
+                        const dosesBeforeFight = sandalwood.usages_remaining;
+                        LogUtils_logHHAuto(`[SW-DEBUG] AJAX do_battles_trolls: isMultibattle=${isMultibattle}, number_of_battles=${number_of_battles}, dosesBeforeFight=${dosesBeforeFight}`);
                         const { rewards } = response;
                         if (rewards && rewards.data && rewards.data.shards) {
-                            let drops = 0;
-                            rewards.data.shards.forEach(({ previous_value, value }) => {
+                            let dosesConsumed = 0;
+                            rewards.data.shards.forEach(({ previous_value, value }, idx) => {
+                                const shardsDropped = value - previous_value;
+                                LogUtils_logHHAuto(`[SW-DEBUG] shard drop[${idx}]: previous=${previous_value}, value=${value}, shardsDropped=${shardsDropped}`);
                                 if (isMultibattle) {
-                                    // Can't reliably determine how many drops, assume MD where each drop would be 1 shard.
-                                    const shardsDropped = value - previous_value;
-                                    drops += Math.floor(shardsDropped / 2);
+                                    const isOdd = shardsDropped % 2 === 1;
+                                    if (isOdd) {
+                                        LogUtils_logHHAuto(`[SW-DEBUG] shard drop[${idx}]: ODD (${shardsDropped}) → Sandalwood expired mid-batch, all ${dosesBeforeFight} doses consumed`);
+                                        dosesConsumed = dosesBeforeFight;
+                                    }
+                                    else {
+                                        const dosesDelta = Math.floor(shardsDropped / 2);
+                                        LogUtils_logHHAuto(`[SW-DEBUG] shard drop[${idx}]: EVEN (${shardsDropped}) → ${dosesDelta} doses consumed`);
+                                        dosesConsumed += dosesDelta;
+                                    }
                                 }
                                 else {
-                                    drops++;
+                                    LogUtils_logHHAuto(`[SW-DEBUG] shard drop[${idx}]: single battle → 1 dose consumed`);
+                                    dosesConsumed++;
                                 }
                             });
-                            sandalwood.usages_remaining -= drops;
+                            // Cap at doses available before fight
+                            const uncappedDoses = dosesConsumed;
+                            dosesConsumed = Math.min(dosesConsumed, dosesBeforeFight);
+                            if (uncappedDoses !== dosesConsumed) {
+                                LogUtils_logHHAuto(`[SW-DEBUG] dose cap applied: uncapped=${uncappedDoses}, capped=${dosesConsumed}`);
+                            }
+                            sandalwood.usages_remaining -= dosesConsumed;
+                            LogUtils_logHHAuto(`[SW-DEBUG] Sandalwood dose tracking: before=${dosesBeforeFight}, consumed=${dosesConsumed}, remaining=${sandalwood.usages_remaining}, ended=${sandalwood.usages_remaining <= 0}`);
                             mythicUpdated = true;
                             sandalwoodEnded = sandalwood.usages_remaining <= 0;
                         }
@@ -1223,10 +1314,11 @@ class Booster {
                     try {
                         if (sandalwood && mythicUpdated && sandalwoodEnded) {
                             const isMultibattle = parseInt(number_of_battles || '') > 1;
-                            LogUtils_logHHAuto("sandalwood may be ended need a new one");
+                            LogUtils_logHHAuto("[SW-DEBUG] sandalwood may be ended, need a new one");
+                            const activatedEvent = getStoredValue(HHStoredVarPrefixKey + SK.plusEvent) === "true" && getStoredValue(HHStoredVarPrefixKey + SK.plusEventSandalWood) === "true";
                             const activatedMythic = getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythic) === "true" && getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythicSandalWood) === "true";
-                            const activatedLoveRaid = getStoredValue(HHStoredVarPrefixKey + SK.plusLoveRaid) === "true" && getStoredValue(HHStoredVarPrefixKey + SK.plusEventLoveRaidSandalWood) === "true";
-                            if (activatedMythic && EventModule.getEventMythicGirl().is_mythic || activatedLoveRaid && LoveRaidManager.getRaidToFight().girl_to_win) {
+                            const activatedLoveRaid = LoveRaidManager.isAnyActivated() && getStoredValue(HHStoredVarPrefixKey + SK.plusEventLoveRaidSandalWood) === "true";
+                            if (activatedEvent && ((_b = EventModule.getEventGirl()) === null || _b === void 0 ? void 0 : _b.girl_id) || activatedMythic && EventModule.getEventMythicGirl().is_mythic || activatedLoveRaid && ((_c = LoveRaidManager.getRaidToFight()) === null || _c === void 0 ? void 0 : _c.girl_to_win)) {
                                 if (isMultibattle) {
                                     // TODO go to market if sandalwood not ended, continue. If ended, buy a new one
                                     gotoPage(ConfigHelper.getHHScriptVars("pagesIDShop"));
@@ -1237,18 +1329,22 @@ class Booster {
                     catch (err) {
                         LogUtils_logHHAuto('Catch error during equip sandalwood for mythic' + err);
                     }
+                    if (action === 'do_battles_trolls') {
+                        Booster.notifyBattleResponseProcessed();
+                    }
                 });
-            }, 200);
+            })();
         });
     }
     static needBoosterStatusFromStore() {
+        const isEventAutoSandalWood = getStoredValue(HHStoredVarPrefixKey + SK.plusEventSandalWood) === "true";
         const isMythicAutoSandalWood = getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythicSandalWood) === "true";
         const isLoveRaidAutoSandalWood = getStoredValue(HHStoredVarPrefixKey + SK.plusEventLoveRaidSandalWood) === "true";
         const isLeagueWithBooster = getStoredValue(HHStoredVarPrefixKey + SK.autoLeaguesBoostedOnly) === "true";
         const isSeasonWithBooster = getStoredValue(HHStoredVarPrefixKey + SK.autoSeasonBoostedOnly) === "true";
         const isPantheonWithBooster = getStoredValue(HHStoredVarPrefixKey + SK.autoPantheonBoostedOnly) === "true";
         const isAutoEquipBoosters = getStoredValue(HHStoredVarPrefixKey + SK.autoEquipBoosters) === "true";
-        return isLeagueWithBooster || isSeasonWithBooster || isPantheonWithBooster || isMythicAutoSandalWood || isLoveRaidAutoSandalWood || isAutoEquipBoosters;
+        return isLeagueWithBooster || isSeasonWithBooster || isPantheonWithBooster || isEventAutoSandalWood || isMythicAutoSandalWood || isLoveRaidAutoSandalWood || isAutoEquipBoosters;
     }
     static getBoosterFromStorage() {
         return getStoredJSON(HHStoredVarPrefixKey + TK.boosterStatus, DEFAULT_BOOSTERS);
@@ -1475,10 +1571,12 @@ class Booster {
         return Booster.getBoosterByIdentifier(Booster.SANDALWOOD_IDENTIFIER);
     }
     static needSandalWoodEquipped(nextTrollChoosen, eventMythicGirl = null, loveRaid = null) {
+        const activatedEvent = getStoredValue(HHStoredVarPrefixKey + SK.plusEvent) === "true" && getStoredValue(HHStoredVarPrefixKey + SK.plusEventSandalWood) === "true";
         const activatedMythic = getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythic) === "true" && getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythicSandalWood) === "true";
-        const activatedLoveRaid = getStoredValue(HHStoredVarPrefixKey + SK.plusLoveRaid) === "true" && getStoredValue(HHStoredVarPrefixKey + SK.plusEventLoveRaidSandalWood) === "true";
-        if (!activatedMythic && !activatedLoveRaid) {
-            // if neither mythic nor love raid auto sandalwood is activated, no need to check
+        const activatedLoveRaid = LoveRaidManager.isAnyActivated() && getStoredValue(HHStoredVarPrefixKey + SK.plusEventLoveRaidSandalWood) === "true";
+        LogUtils_logHHAuto(`[SW-DEBUG] needSandalWoodEquipped: troll=${nextTrollChoosen}, activatedEvent=${activatedEvent}, activatedMythic=${activatedMythic}, activatedLoveRaid=${activatedLoveRaid}`);
+        if (!activatedEvent && !activatedMythic && !activatedLoveRaid) {
+            LogUtils_logHHAuto('[SW-DEBUG] needSandalWoodEquipped: no auto-sandalwood activated, skipping');
             return false;
         }
         // Don't try to equip if we're on cooldown from a recent failure
@@ -1492,7 +1590,10 @@ class Booster {
             LogUtils_logHHAuto("needSandalWoodEquipped: No market data cached. Need market visit to check Sandalwood inventory.");
             return true;
         }
-        let needForMythic = false, needForLoveRaid = false;
+        let needForEvent = false, needForMythic = false, needForLoveRaid = false;
+        if (activatedEvent) {
+            needForEvent = Booster.needSandalWoodEvent(nextTrollChoosen);
+        }
         if (activatedMythic) {
             if (!eventMythicGirl) {
                 eventMythicGirl = EventModule.getEventMythicGirl();
@@ -1505,12 +1606,25 @@ class Booster {
             }
             needForLoveRaid = Booster.needSandalWoodLoveRaid(nextTrollChoosen, loveRaid);
         }
-        return ((needForMythic || needForLoveRaid) && Booster.ownedSandalwoodAndNotEquiped());
+        LogUtils_logHHAuto(`[SW-DEBUG] needSandalWoodEquipped: needForEvent=${needForEvent}, needForMythic=${needForMythic}, needForLoveRaid=${needForLoveRaid}`);
+        // Proactive depletion check: if Sandalwood is equipped but has 0 doses remaining,
+        // remove it from boosterStatus so ownedSandalwoodAndNotEquiped() triggers re-equip.
+        if (needForEvent || needForMythic || needForLoveRaid) {
+            const dosesRemaining = Booster.getSandalwoodDosesRemaining();
+            LogUtils_logHHAuto(`[SW-DEBUG] needSandalWoodEquipped: proactive depletion check, dosesRemaining=${dosesRemaining}`);
+            if (dosesRemaining !== null && dosesRemaining <= 0) {
+                LogUtils_logHHAuto('needSandalWoodEquipped: Sandalwood depleted (0 doses), removing from boosterStatus to trigger re-equip');
+                const boosterStatus = Booster.getBoosterFromStorage();
+                boosterStatus.mythic = boosterStatus.mythic.filter(b => { var _a; return ((_a = b.item) === null || _a === void 0 ? void 0 : _a.identifier) !== 'MB1'; });
+                setStoredValue(HHStoredVarPrefixKey + TK.boosterStatus, JSON.stringify(boosterStatus));
+            }
+        }
+        return ((needForEvent || needForMythic || needForLoveRaid) && Booster.ownedSandalwoodAndNotEquiped());
     }
     static ownedSandalwoodAndNotEquiped() {
         const ownedSandalwood = HeroHelper.haveBoosterInInventory(Booster.SANDALWOOD_IDENTIFIER);
         const equipedSandalwood = Booster.haveBoosterEquiped(Booster.SANDALWOOD_IDENTIFIER);
-        LogUtils_logHHAuto(`ownedSandalwoodAndNotEquiped: owned=${ownedSandalwood}, equipped=${equipedSandalwood}, result=${ownedSandalwood && !equipedSandalwood}`);
+        LogUtils_logHHAuto(`[SW-DEBUG] ownedSandalwoodAndNotEquiped: owned=${ownedSandalwood}, equipped=${equipedSandalwood}, result=${ownedSandalwood && !equipedSandalwood}`);
         return ownedSandalwood && !equipedSandalwood;
     }
     static isEquipOnCooldown() {
@@ -1547,74 +1661,100 @@ class Booster {
             }
         }
     }
+    static needSandalWoodEvent(nextTrollChoosen, eventGirl = null) {
+        if (!eventGirl) {
+            eventGirl = EventModule.getEventGirl();
+        }
+        if (!(eventGirl === null || eventGirl === void 0 ? void 0 : eventGirl.girl_id) || eventGirl.is_mythic)
+            return false;
+        const activated = getStoredValue(HHStoredVarPrefixKey + SK.plusEvent) === "true" && getStoredValue(HHStoredVarPrefixKey + SK.plusEventSandalWood) === "true";
+        const correctTrollTargetted = eventGirl.troll_id == nextTrollChoosen;
+        const remainingShards = Number(100 - Number(eventGirl.shards));
+        if (remainingShards <= 10) {
+            LogUtils_logHHAuto(`[SW-DEBUG] Not equipping sandalwood for event, only ${remainingShards} shards remaining`);
+        }
+        return activated && correctTrollTargetted && remainingShards > 10;
+    }
     static needSandalWoodMythic(nextTrollChoosen, eventMythicGirl = null) {
         const activated = getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythic) === "true" && getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythicSandalWood) === "true";
         const correctTrollTargetted = eventMythicGirl.is_mythic && eventMythicGirl.troll_id == nextTrollChoosen;
         const remainingShards = Number(100 - Number(eventMythicGirl.shards));
         if (remainingShards <= 10) {
-            LogUtils_logHHAuto(`Not equipping sandalwood for mythic, only ${remainingShards} shards remaining`);
+            LogUtils_logHHAuto(`[SW-DEBUG] Not equipping sandalwood for mythic, only ${remainingShards} shards remaining`);
         }
         return activated && correctTrollTargetted && remainingShards > 10;
     }
     static needSandalWoodLoveRaid(nextTrollChoosen, loveRaid = null) {
-        const activated = getStoredValue(HHStoredVarPrefixKey + SK.plusLoveRaid) === "true" && getStoredValue(HHStoredVarPrefixKey + SK.plusEventLoveRaidSandalWood) === "true";
+        if (!loveRaid)
+            return false;
+        const activated = LoveRaidManager.isAnyActivated() && getStoredValue(HHStoredVarPrefixKey + SK.plusEventLoveRaidSandalWood) === "true";
         const correctTrollTargetted = loveRaid.girl_to_win && loveRaid.trollId == nextTrollChoosen;
         const remainingShards = Number(100 - Number(loveRaid.girl_shards));
         if (remainingShards <= 10) {
-            LogUtils_logHHAuto(`Not equipping sandalwood for love raid, only ${remainingShards} shards remaining`);
+            LogUtils_logHHAuto(`[SW-DEBUG] Not equipping sandalwood for love raid, only ${remainingShards} shards remaining`);
         }
         return activated && correctTrollTargetted && remainingShards > 10;
     }
     static equipeSandalWoodIfNeeded(nextTrollChoosen, settingKey = SK.plusEventMythicSandalWood) {
         return __awaiter(this, void 0, void 0, function* () {
-            LogUtils_logHHAuto(`equipeSandalWoodIfNeeded: called for troll ${nextTrollChoosen}, settingKey=${settingKey}`);
+            LogUtils_logHHAuto(`[SW-DEBUG] equipeSandalWoodIfNeeded: called for troll ${nextTrollChoosen}, settingKey=${settingKey}`);
+            const activatedEvent = getStoredValue(HHStoredVarPrefixKey + SK.plusEvent) === "true" && getStoredValue(HHStoredVarPrefixKey + SK.plusEventSandalWood) === "true";
             const activatedMythic = getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythic) === "true" && getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythicSandalWood) === "true";
-            const activatedLoveRaid = getStoredValue(HHStoredVarPrefixKey + SK.plusLoveRaid) === "true" && getStoredValue(HHStoredVarPrefixKey + SK.plusEventLoveRaidSandalWood) === "true";
-            LogUtils_logHHAuto(`equipeSandalWoodIfNeeded: activatedMythic=${activatedMythic}, activatedLoveRaid=${activatedLoveRaid}`);
+            const activatedLoveRaid = LoveRaidManager.isAnyActivated() && getStoredValue(HHStoredVarPrefixKey + SK.plusEventLoveRaidSandalWood) === "true";
+            LogUtils_logHHAuto(`[SW-DEBUG] equipeSandalWoodIfNeeded: activatedEvent=${activatedEvent}, activatedMythic=${activatedMythic}, activatedLoveRaid=${activatedLoveRaid}`);
             let eventMythicGirl = null, loveRaid = null;
-            let needForMythic = false, needForLoveRaid = false;
+            let needForEvent = false, needForMythic = false, needForLoveRaid = false;
+            if (activatedEvent) {
+                needForEvent = Booster.needSandalWoodEvent(nextTrollChoosen);
+                if (needForEvent) {
+                    settingKey = SK.plusEventSandalWood;
+                }
+            }
             if (activatedMythic) {
                 if (!eventMythicGirl) {
                     eventMythicGirl = EventModule.getEventMythicGirl();
                 }
                 needForMythic = Booster.needSandalWoodMythic(nextTrollChoosen, eventMythicGirl);
+                if (needForMythic) {
+                    settingKey = SK.plusEventMythicSandalWood;
+                }
             }
             if (activatedLoveRaid) {
                 if (!loveRaid) {
                     loveRaid = LoveRaidManager.getRaidToFight();
                 }
                 needForLoveRaid = Booster.needSandalWoodLoveRaid(nextTrollChoosen, loveRaid);
-                if (needForLoveRaid && !needForMythic) {
+                if (needForLoveRaid && !needForMythic && !needForEvent) {
                     settingKey = SK.plusEventLoveRaidSandalWood;
                 }
             }
-            LogUtils_logHHAuto(`equipeSandalWoodIfNeeded: needForMythic=${needForMythic}, needForLoveRaid=${needForLoveRaid}`);
+            LogUtils_logHHAuto(`[SW-DEBUG] equipeSandalWoodIfNeeded: needForEvent=${needForEvent}, needForMythic=${needForMythic}, needForLoveRaid=${needForLoveRaid}`);
             try {
-                if (((needForMythic || needForLoveRaid) && Booster.ownedSandalwoodAndNotEquiped())) {
+                if (((needForEvent || needForMythic || needForLoveRaid) && Booster.ownedSandalwoodAndNotEquiped())) {
                     // Check cooldown before attempting equip
                     if (Booster.isEquipOnCooldown()) {
-                        LogUtils_logHHAuto("equipeSandalWoodIfNeeded: on cooldown, skipping equip attempt");
+                        LogUtils_logHHAuto("[SW-DEBUG] equipeSandalWoodIfNeeded: on cooldown, skipping equip attempt");
                         return false;
                     }
                     // Resolve Sandalwood booster from market data
                     const sandalwoodBooster = Booster.getSandalwoodBooster();
                     if (!sandalwoodBooster) {
-                        LogUtils_logHHAuto("equipeSandalWoodIfNeeded: No market data for Sandalwood. Visit the market first.");
+                        LogUtils_logHHAuto("[SW-DEBUG] equipeSandalWoodIfNeeded: No market data for Sandalwood. Visit the market first.");
                         return false;
                     }
                     // Equip a new one
-                    LogUtils_logHHAuto("equipeSandalWoodIfNeeded: calling HeroHelper.equipBooster(Sandalwood)");
+                    LogUtils_logHHAuto("[SW-DEBUG] equipeSandalWoodIfNeeded: calling HeroHelper.equipBooster(Sandalwood)");
                     const equiped = yield HeroHelper.equipBooster(sandalwoodBooster);
-                    LogUtils_logHHAuto(`equipeSandalWoodIfNeeded: equipBooster returned ${equiped}`);
+                    LogUtils_logHHAuto(`[SW-DEBUG] equipeSandalWoodIfNeeded: equipBooster returned ${equiped}`);
                     if (!equiped) {
                         const numberFailure = HeroHelper.getSandalWoodEquipFailure();
-                        LogUtils_logHHAuto(`equipeSandalWoodIfNeeded: failure #${numberFailure}`);
+                        LogUtils_logHHAuto(`[SW-DEBUG] equipeSandalWoodIfNeeded: failure #${numberFailure}`);
                         if (numberFailure >= 3) {
-                            LogUtils_logHHAuto("equipeSandalWoodIfNeeded: 3rd failure, deactivating auto sandalwood settingKey=" + settingKey);
+                            LogUtils_logHHAuto("[SW-DEBUG] equipeSandalWoodIfNeeded: 3rd failure, deactivating auto sandalwood settingKey=" + settingKey);
                             setStoredValue(HHStoredVarPrefixKey + settingKey, 'false');
                         }
                         else {
-                            LogUtils_logHHAuto("equipeSandalWoodIfNeeded: marking as already equipped + setting cooldown");
+                            LogUtils_logHHAuto("[SW-DEBUG] equipeSandalWoodIfNeeded: marking as already equipped + setting cooldown");
                             // Server says max boosters equipped - mark it as equipped to prevent retries
                             Booster.markBoosterAsEquippedInStorage(sandalwoodBooster);
                             // Set cooldown to prevent spamming equip attempts
@@ -1623,25 +1763,85 @@ class Booster {
                     }
                     else {
                         // Reset failure counter on success
-                        LogUtils_logHHAuto("equipeSandalWoodIfNeeded: success, resetting failure counter");
+                        LogUtils_logHHAuto("[SW-DEBUG] equipeSandalWoodIfNeeded: success, resetting failure counter");
                         setStoredValue(HHStoredVarPrefixKey + TK.sandalwoodFailure, 0);
                     }
                     return equiped;
                 }
                 else {
-                    LogUtils_logHHAuto(`equipeSandalWoodIfNeeded: conditions not met, no equip needed`);
+                    LogUtils_logHHAuto(`[SW-DEBUG] equipeSandalWoodIfNeeded: conditions not met, no equip needed`);
                 }
             }
             catch (error) {
-                LogUtils_logHHAuto(`equipeSandalWoodIfNeeded: caught error: ${error}`);
+                LogUtils_logHHAuto(`[SW-DEBUG] equipeSandalWoodIfNeeded: caught error: ${error}`);
                 return Promise.resolve(false);
             }
             return Promise.resolve(false);
         });
     }
+    /**
+     * Returns the number of remaining Sandalwood doses from boosterStatus.
+     * Returns null if Sandalwood is not currently equipped.
+     */
+    static getSandalwoodDosesRemaining() {
+        const boosterStatus = Booster.getBoosterFromStorage();
+        const sandalwood = boosterStatus.mythic.find(b => { var _a; return ((_a = b.item) === null || _a === void 0 ? void 0 : _a.identifier) === 'MB1'; });
+        if (!sandalwood)
+            return null;
+        return sandalwood.usages_remaining;
+    }
+    /**
+     * Determines the maximum recommended batch size (1, 10, or 50) based on
+     * remaining shards, Sandalwood doses, and user settings.
+     *
+     * The most restrictive constraint wins.
+     */
+    static getRecommendedBatchSize(minRemainingShards, dosesRemaining, userSettings) {
+        LogUtils_logHHAuto(`[SW-DEBUG] getRecommendedBatchSize: minRemainingShards=${minRemainingShards}, dosesRemaining=${dosesRemaining}, settings=${JSON.stringify(userSettings)}`);
+        let maxBatch = 50;
+        // User preference caps
+        if (!userSettings.useX50) {
+            maxBatch = 10;
+            LogUtils_logHHAuto('[SW-DEBUG] batch cap: useX50=false → max 10');
+        }
+        if (!userSettings.useX10) {
+            maxBatch = 1;
+            LogUtils_logHHAuto('[SW-DEBUG] batch cap: useX10=false → max 1');
+        }
+        // If Sandalwood is not equipped, no dose-based restrictions apply
+        if (dosesRemaining === null) {
+            LogUtils_logHHAuto(`[SW-DEBUG] getRecommendedBatchSize: no Sandalwood equipped → returning ${maxBatch}`);
+            return maxBatch;
+        }
+        // Dose-based limits (check most restrictive first)
+        if (dosesRemaining <= userSettings.sandalwoodDosesX1Limit) {
+            LogUtils_logHHAuto(`[SW-DEBUG] batch cap: doses ${dosesRemaining} <= dosesX1Limit ${userSettings.sandalwoodDosesX1Limit} → max 1`);
+            maxBatch = 1;
+        }
+        else if (dosesRemaining <= userSettings.sandalwoodDosesX10Limit && maxBatch > 10) {
+            LogUtils_logHHAuto(`[SW-DEBUG] batch cap: doses ${dosesRemaining} <= dosesX10Limit ${userSettings.sandalwoodDosesX10Limit} → max 10`);
+            maxBatch = 10;
+        }
+        // Shard-based limits: collectedShards = 100 - minRemainingShards
+        const collectedShards = 100 - minRemainingShards;
+        if (collectedShards >= userSettings.sandalwoodShardsX1Limit) {
+            LogUtils_logHHAuto(`[SW-DEBUG] batch cap: collectedShards ${collectedShards} >= shardsX1Limit ${userSettings.sandalwoodShardsX1Limit} → max 1`);
+            maxBatch = 1;
+        }
+        else if (collectedShards >= userSettings.sandalwoodShardsX10Limit && maxBatch > 10) {
+            LogUtils_logHHAuto(`[SW-DEBUG] batch cap: collectedShards ${collectedShards} >= shardsX10Limit ${userSettings.sandalwoodShardsX10Limit} → max 10`);
+            maxBatch = 10;
+        }
+        LogUtils_logHHAuto(`[SW-DEBUG] getRecommendedBatchSize: final recommendation → ${maxBatch}`);
+        return maxBatch;
+    }
 }
 /** Sandalwood identifier constant — id_item is resolved from market data or env config at runtime. */
 Booster.SANDALWOOD_IDENTIFIER = "MB1";
+/** Flag: true if AJAX response arrived before waitForBattleResponse() was called */
+Booster._battleResponseReady = false;
+/** Resolver: set when waitForBattleResponse() is waiting; called by notifyBattleResponseProcessed() */
+Booster._battleResponseResolve = null;
 
 ;// CONCATENATED MODULE: ./src/Module/Bundles.ts
 // Bundles.ts -- Collects free daily and periodic bundles from the shop popup.
@@ -3479,7 +3679,22 @@ class LoveRaidManager {
         return raids.sort((a, b) => (a.seconds_until_event_end - b.seconds_until_event_end))[0] || null;
     }
     static getAllRaids() {
+        var _a;
         let raids = getStoredJSON(HHStoredVarPrefixKey + TK.loveRaids, []);
+        // Backfill girlGrade for raids stored before v7.32.2
+        // Old event_name format: "GirlName <Graded>" e.g. "Luna 5" or "Luna 3★"
+        for (const raid of raids) {
+            if (raid.girlGrade === undefined || raid.girlGrade === 0) {
+                const trailingMatch = (_a = raid.event_name) === null || _a === void 0 ? void 0 : _a.match(/(\d+)\s*★?\s*$/);
+                const trailingNumber = trailingMatch ? Number(trailingMatch[1]) : 0;
+                if (trailingNumber > 0) {
+                    raid.girlGrade = trailingNumber;
+                }
+                else if (raid.isMythic) {
+                    raid.girlGrade = 6;
+                }
+            }
+        }
         return raids;
     }
     static getTrollRaids() {
@@ -3498,51 +3713,81 @@ class LoveRaidManager {
         if (!raids || raids.length === 0) {
             raids = LoveRaidManager.getTrollRaids();
         }
+        const plusGirlSkins = getStoredValue(HHStoredVarPrefixKey + SK.plusGirlSkins) === "true";
         let raid = undefined;
         let autoRaidSelectedIndex = getStoredValue(HHStoredVarPrefixKey + SK.autoLoveRaidSelectedIndex);
+        LogUtils_logHHAuto(`getRaidToFight: selector="${autoRaidSelectedIndex}", raids=${raids.length}, raidIds=[${raids.map(r => r.trollId + '_' + r.id_girl).join(',')}]`);
         if (autoRaidSelectedIndex === undefined || autoRaidSelectedIndex === '') {
-            autoRaidSelectedIndex = 0;
+            autoRaidSelectedIndex = '0';
         }
-        else if (autoRaidSelectedIndex != 0) {
+        else if (autoRaidSelectedIndex !== '0' && autoRaidSelectedIndex !== 'first') {
             const autoRaidSelectedIndexArray = autoRaidSelectedIndex.split('_');
             if (autoRaidSelectedIndexArray.length !== 2) {
                 if (logging)
                     LogUtils_logHHAuto('Saved raid index is malformed, resetting to default');
-                autoRaidSelectedIndex = 0;
+                autoRaidSelectedIndex = '0';
             }
             else {
-                autoRaidSelectedIndex = Number(autoRaidSelectedIndexArray[0]);
-                raid = raids.find(raid => raid.trollId === autoRaidSelectedIndex);
-                if (!raid || raid.id_girl != autoRaidSelectedIndexArray[1]) {
-                    if (logging)
-                        LogUtils_logHHAuto('Saved raid is no longer valid or new girl, resetting to default');
-                    autoRaidSelectedIndex = 0;
+                const selectedTrollId = Number(autoRaidSelectedIndexArray[0]);
+                const selectedGirlId = autoRaidSelectedIndexArray[1];
+                raid = raids.find(raid => raid.trollId === selectedTrollId && String(raid.id_girl) === selectedGirlId);
+                if (!raid) {
+                    // Girl not in this filtered list — check ALL troll raids before resetting
+                    const allRaids = LoveRaidManager.getTrollRaids();
+                    const existsElsewhere = allRaids.find(r => r.trollId === selectedTrollId && String(r.id_girl) === selectedGirlId);
+                    if (!existsElsewhere) {
+                        if (logging)
+                            LogUtils_logHHAuto('Saved raid is no longer valid, resetting to default');
+                        autoRaidSelectedIndex = '0';
+                    }
+                    else {
+                        if (logging)
+                            LogUtils_logHHAuto('Selected raid girl not in this filtered list, skipping (not resetting)');
+                    }
                 }
             }
         }
-        if (logging && raid) {
-            LogUtils_logHHAuto(`LoveRaid troll fight: ${raid.trollId} selected  with girl ${raid.id_girl} to win`);
+        // Check if selected raid's girl is done (shards complete + skins done or not wanted)
+        if (raid && raid.girl_shards >= 100) {
+            const skinsDone = !raid.skin_to_win;
+            if (!plusGirlSkins || skinsDone) {
+                if (logging)
+                    LogUtils_logHHAuto(`Raid girl ${raid.id_girl} completed (shards: ${raid.girl_shards}, skins done: ${skinsDone}, +Girl Skins: ${plusGirlSkins}), resetting selector`);
+                setStoredValue(HHStoredVarPrefixKey + SK.autoLoveRaidSelectedIndex, "0");
+                autoRaidSelectedIndex = '0';
+                raid = undefined;
+            }
+            else {
+                if (logging)
+                    LogUtils_logHHAuto(`Raid girl ${raid.id_girl} won but still has skins to collect (+Girl Skins ON)`);
+            }
         }
-        if (autoRaidSelectedIndex == 0) {
+        if (logging && raid) {
+            LogUtils_logHHAuto(`LoveRaid troll fight: ${raid.trollId} selected with girl ${raid.id_girl} to win`);
+        }
+        // "first" = First ending raid (old default behavior)
+        if (autoRaidSelectedIndex === 'first') {
             const raidWithGirls = raids.filter(raid => raid.girl_shards < 100);
             if (raidWithGirls.length > 0) {
                 raid = raidWithGirls[0];
             }
-            else
-                raid = raids[0];
-            if (logging) {
-                if (raidWithGirls) {
-                    LogUtils_logHHAuto(`LoveRaid troll fight: ${raid.trollId} with girl ${raid.id_girl} to win`);
-                }
-                else {
-                    LogUtils_logHHAuto(`LoveRaid troll fight: ${raid.trollId} with skin for girl ${raid.id_girl} to win`);
-                }
+            else if (plusGirlSkins) {
+                raid = raids.find(r => r.skin_to_win) || undefined;
             }
+            if (logging && raid) {
+                LogUtils_logHHAuto(`LoveRaid first ending raid: troll ${raid.trollId} with girl ${raid.id_girl}`);
+            }
+        }
+        // Default "Choose a girl" (0) = no automatic fight
+        if (autoRaidSelectedIndex === '0') {
+            if (logging)
+                LogUtils_logHHAuto('Raid selector is "Choose a girl" — no automatic raid fight');
+            raid = undefined;
         }
         return raid;
     }
     static parseRaids(raidNotStarted = false) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
         const debugEnabled = getStoredValue(HHStoredVarPrefixKey + TK.Debug) === 'true';
         const raids = [];
         const kkRaids = love_raids != undefined ? love_raids : [];
@@ -3564,7 +3809,11 @@ class LoveRaidManager {
                     if (debugEnabled && ((_c = kkRaid.girl_data) === null || _c === void 0 ? void 0 : _c.shards) >= 100) {
                         LogUtils_logHHAuto(`Girl won, may have skin to win, ignore for now`);
                     }
-                    raid.event_name = (((_d = kkRaid.girl_data) === null || _d === void 0 ? void 0 : _d.name) || kkRaid.event_name || kkRaid.id_girl) + ' ' + (((_e = kkRaid.girl_data) === null || _e === void 0 ? void 0 : _e.Graded) || '');
+                    // nb_grades = number of star slots (3=rare, 5=legendary, 6=mythic)
+                    // Graded is a string of star symbols (e.g. "☆☆☆"), graded = completed awakenings
+                    raid.girlGrade = Number((_d = kkRaid.girl_data) === null || _d === void 0 ? void 0 : _d.nb_grades) || 0;
+                    raid.isMythic = ((_e = kkRaid.girl_data) === null || _e === void 0 ? void 0 : _e.rarity) === 'mythic' || raid.girlGrade >= 6;
+                    raid.event_name = (((_f = kkRaid.girl_data) === null || _f === void 0 ? void 0 : _f.name) || kkRaid.event_name || kkRaid.id_girl) + ' ' + raid.girlGrade + '★';
                     raid.raid_module_type = kkRaid.raid_module_type;
                     raid.seconds_until_event_end = Number(kkRaid.seconds_until_event_end);
                     raid.seconds_until_event_start = Number(kkRaid.seconds_until_event_start);
@@ -3572,9 +3821,8 @@ class LoveRaidManager {
                     raid.start_datetime = kkRaid.start_datetime;
                     raid.end_datetime = kkRaid.end_datetime;
                     raid.shards_left = Number(kkRaid.tranche_data.shards_left);
-                    if (kkRaid.status == 'ongoing' && (((_h = (_g = (_f = kkRaid.girl_data) === null || _f === void 0 ? void 0 : _f.source) === null || _g === void 0 ? void 0 : _g.anchor_source) === null || _h === void 0 ? void 0 : _h.disabled) || ((_l = (_k = (_j = kkRaid.girl_data) === null || _j === void 0 ? void 0 : _j.source) === null || _k === void 0 ? void 0 : _k.anchor_win_from) === null || _l === void 0 ? void 0 : _l.disabled))) {
-                        LogUtils_logHHAuto(`Raid source not yet available, ignoring raid (${(_o = (_m = kkRaid.girl_data) === null || _m === void 0 ? void 0 : _m.source) === null || _o === void 0 ? void 0 : _o.sentence})`);
-                        continue;
+                    if (kkRaid.status == 'ongoing' && (((_j = (_h = (_g = kkRaid.girl_data) === null || _g === void 0 ? void 0 : _g.source) === null || _h === void 0 ? void 0 : _h.anchor_source) === null || _j === void 0 ? void 0 : _j.disabled) || ((_m = (_l = (_k = kkRaid.girl_data) === null || _k === void 0 ? void 0 : _k.source) === null || _l === void 0 ? void 0 : _l.anchor_win_from) === null || _m === void 0 ? void 0 : _m.disabled))) {
+                        LogUtils_logHHAuto(`Raid source display disabled, still parsing raid (${(_p = (_o = kkRaid.girl_data) === null || _o === void 0 ? void 0 : _o.source) === null || _p === void 0 ? void 0 : _p.sentence})`);
                     }
                     if ($('.raid-card')[index].classList.contains('multiple-girl')) {
                         let girlSkinShards = parseInt($($($('.raid-card')[index].getElementsByClassName('shards'))[1]).attr('skins-shard'), 10);
@@ -3626,6 +3874,26 @@ class LoveRaidManager {
     }
     static isActivated() {
         return LoveRaidManager.isEnabled() && getStoredValue(HHStoredVarPrefixKey + SK.plusLoveRaid) === "true";
+    }
+    /**
+     * Returns the minimum girl grade for +Raid Stars filtering.
+     * Stored value is the grade directly: 0 = off, 3 = rare+, 5 = legendary+, 6 = mythic only.
+     */
+    static getMinRaidStars() {
+        if (!LoveRaidManager.isEnabled())
+            return 0;
+        const val = Number(getStoredValue(HHStoredVarPrefixKey + SK.plusLoveRaidMythic));
+        return isNaN(val) ? 0 : val;
+    }
+    static isRaidStarsActivated() {
+        return LoveRaidManager.getMinRaidStars() > 0;
+    }
+    /** @deprecated Use isRaidStarsActivated() — kept for backward compat */
+    static isMythicActivated() {
+        return LoveRaidManager.isRaidStarsActivated();
+    }
+    static isAnyActivated() {
+        return LoveRaidManager.isActivated() || LoveRaidManager.isRaidStarsActivated();
     }
     static styles() {
         $('.love-raids-container').removeClass('height-for-ad');
@@ -3943,11 +4211,20 @@ class Season {
         if (runThreshold > 0) {
             Tegzd += ' (' + threshold + '<' + Season.getEnergy() + '<=' + runThreshold + ')';
         }
+        const isMaxTierSet = getStoredValue(HHStoredVarPrefixKey + SK.autoSeasonMaxTier) === "true";
+        const maxTierNb = getStoredValue(HHStoredVarPrefixKey + SK.autoSeasonMaxTierNb) || Season.LAST_SEASON_LEVEL;
         if (runThreshold > 0 && Season.getEnergy() < runThreshold) {
             Tegzd += ' ' + getTextForUI("waitRunThreshold", "elementText");
         }
         else {
-            Tegzd += ' : ' + getTimeLeft('nextSeasonTime');
+            const timeLeft = getTimeLeft('nextSeasonTime');
+            Tegzd += ' : ' + timeLeft;
+            if (isMaxTierSet && timeLeft === "Time's up!") {
+                Tegzd += ' (Max Tier ' + maxTierNb + ')';
+            }
+        }
+        if (isMaxTierSet) {
+            Tegzd += ' [≤T' + maxTierNb + ']';
         }
         if (boostLimited) {
             Tegzd += ' ' + getTextForUI("boostMissing", "elementText") + '</li>';
@@ -4580,6 +4857,7 @@ class SeasonalEvent {
                                 if (!manualCollectAll) {
                                     gotoPage(ConfigHelper.getHHScriptVars("pagesIDHome"));
                                 }
+                                SeasonalEvent.removeCollectAllButtonIfNeeded();
                             }
                         }
                         collectSeasonalEventRewards();
@@ -4589,7 +4867,10 @@ class SeasonalEvent {
                         LogUtils_logHHAuto("No SeasonalEvent reward to collect.");
                         setTimer('nextSeasonalEventCollectTime', ConfigHelper.getHHScriptVars("maxCollectionDelay") + randomInterval(60, 180));
                         setTimer('nextSeasonalEventCollectAllTime', ConfigHelper.getHHScriptVars("maxCollectionDelay") + randomInterval(60, 180));
-                        gotoPage(ConfigHelper.getHHScriptVars("pagesIDHome"));
+                        if (!manualCollectAll) {
+                            gotoPage(ConfigHelper.getHHScriptVars("pagesIDHome"));
+                        }
+                        SeasonalEvent.removeCollectAllButtonIfNeeded();
                         return false;
                     }
                 }
@@ -4670,6 +4951,20 @@ class SeasonalEvent {
             button.one('click', () => {
                 SeasonalEvent.goAndCollect(true);
             });
+            $('button[rel="claim"]').on('click', () => {
+                // Wait 1s to let the reward popup open and then check if there is still unclaimed rewards, if not remove the collect all button and tooltip
+                setTimeout(() => {
+                    if (!SeasonalEvent.hasUnclaimedRewards()) {
+                        $('#SeasonalCollectAll').remove();
+                        divTooltip.remove();
+                    }
+                }, 1000);
+            });
+        }
+    }
+    static removeCollectAllButtonIfNeeded() {
+        if (!SeasonalEvent.hasUnclaimedRewards() && $('#SeasonalCollectAll').length == 0) {
+            $('#SeasonalCollectAll').remove();
         }
     }
     static displayGirlsMileStones() {
@@ -6435,8 +6730,8 @@ class Harem {
                 const haremItem = getStoredValue(HHStoredVarPrefixKey + TK.haremGirlActions);
                 const haremGirlMode = getStoredValue(HHStoredVarPrefixKey + TK.haremGirlMode);
                 if (getPage() === ConfigHelper.getHHScriptVars("pagesIDWaifu")) {
-                    HaremGirl.HaremDisplayGirlPopup(HaremGirl.SKILLS_TYPE, "Get scrolls", 1, 0);
                     if (!!haremItem && haremGirlMode === 'team') {
+                        HaremGirl.HaremDisplayGirlPopup(HaremGirl.SKILLS_TYPE, "Get scrolls", 1, 0);
                         if (debugEnabled)
                             LogUtils_logHHAuto("Waifu page detected, get girls with skills");
                         const girlDictionary = getHHVars("girls_data_list");
@@ -6897,7 +7192,11 @@ class Troll {
     }
     static isTrollFightActivated() {
         return Troll.isEnabled() &&
-            (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true" || getStoredValue(HHStoredVarPrefixKey + TK.autoTrollBattleSaveQuest) === "true");
+            (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true"
+                || getStoredValue(HHStoredVarPrefixKey + TK.autoTrollBattleSaveQuest) === "true"
+                || getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythic) === "true"
+                || getStoredValue(HHStoredVarPrefixKey + SK.plusEvent) === "true"
+                || LoveRaidManager.isAnyActivated());
     }
     static getLastTrollIdAvailable(logging = false, id_world = undefined) {
         const isMainAdventure = getHHVars('Hero.infos.questing.choices_adventure') == 0;
@@ -6961,7 +7260,11 @@ class Troll {
         const lastTrollIdAvailable = Troll.getLastTrollIdAvailable(logging);
         const eventGirl = EventModule.getEventGirl();
         const eventMythicGirl = EventModule.getEventMythicGirl();
-        const loveRaids = LoveRaidManager.isActivated() ? LoveRaidManager.getTrollRaids() : [];
+        const allTrollRaids = LoveRaidManager.isAnyActivated() ? LoveRaidManager.getTrollRaids() : [];
+        const minRaidStars = LoveRaidManager.getMinRaidStars();
+        const raidStarsRaids = minRaidStars > 0 ? allTrollRaids.filter(raid => raid.girlGrade >= minRaidStars) : [];
+        // +Raid: user-selected girl bypasses grade filter, auto-mode ("first") respects it
+        const loveRaids = LoveRaidManager.isActivated() ? allTrollRaids : [];
         if (debugEnabled && logging) {
             LogUtils_logHHAuto('eventGirl', eventGirl);
             LogUtils_logHHAuto('eventMythicGirl', eventMythicGirl);
@@ -6972,12 +7275,20 @@ class Troll {
                 LogUtils_logHHAuto("Mythic Event troll fight");
             TTF = Troll.getTrollIdFromEvent(eventMythicGirl);
         }
+        else if (raidStarsRaids.length > 0) {
+            if (logging)
+                LogUtils_logHHAuto("Raid Stars troll fight (min grade " + minRaidStars + ")");
+            const loveRaid = LoveRaidManager.getRaidToFight(raidStarsRaids, logging);
+            if (loveRaid) {
+                TTF = loveRaid.trollId;
+            }
+        }
         else if (getStoredValue(HHStoredVarPrefixKey + SK.plusEvent) === "true" && !checkTimer("eventGoing") && eventGirl.girl_id && !eventGirl.is_mythic) {
             if (logging)
                 LogUtils_logHHAuto("Event troll fight");
             TTF = Troll.getTrollIdFromEvent(eventGirl);
         }
-        else if (autoTrollSelectedIndex === 98 || autoTrollSelectedIndex === 99) {
+        else if (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true" && (autoTrollSelectedIndex === 98 || autoTrollSelectedIndex === 99)) {
             if (trollWithGirls === undefined || trollWithGirls.length === 0) {
                 if (logging)
                     LogUtils_logHHAuto("No troll with girls from storage, parsing game info ...");
@@ -7019,19 +7330,22 @@ class Troll {
         }
         else if (LoveRaidManager.isActivated() && loveRaids.length > 0) {
             const loveRaid = LoveRaidManager.getRaidToFight(loveRaids, logging);
-            TTF = loveRaid.trollId;
+            if (loveRaid) {
+                TTF = loveRaid.trollId;
+            }
         }
-        else if (autoTrollSelectedIndex > 0 && autoTrollSelectedIndex < 98) {
+        else if (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true" && autoTrollSelectedIndex > 0 && autoTrollSelectedIndex < 98) {
             TTF = autoTrollSelectedIndex;
             if (logging)
                 LogUtils_logHHAuto("Custom troll fight.");
         }
-        else {
+        else if (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true") {
             TTF = lastTrollIdAvailable;
             if (logging)
                 LogUtils_logHHAuto("Last troll fight: " + TTF);
         }
-        if (getStoredValue(HHStoredVarPrefixKey + TK.autoTrollBattleSaveQuest) === "true" && logging) {
+        if (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true"
+            && getStoredValue(HHStoredVarPrefixKey + TK.autoTrollBattleSaveQuest) === "true" && logging) {
             TTF = lastTrollIdAvailable;
             LogUtils_logHHAuto("Last troll fight for quest item: " + TTF);
             //setStoredValue(HHStoredVarPrefixKey+TK.autoTrollBattleSaveQuest, "false");
@@ -7039,15 +7353,35 @@ class Troll {
         }
         const trollz = ConfigHelper.getHHScriptVars("trollzList");
         const sideTrollz = ConfigHelper.getHHScriptVars("sideTrollzList");
-        if (TTF <= 0) {
-            TTF = lastTrollIdAvailable > 0 ? lastTrollIdAvailable : 1;
-            if (logging)
-                LogUtils_logHHAuto(`Error: wrong troll target found. Backup to ${TTF}`);
+        // Check if selected troll is actually unlocked (love raid girls can be on locked trolls)
+        if (TTF > 0 && TTF > lastTrollIdAvailable) {
+            LogUtils_logHHAuto(`Troll ${TTF} (${trollz[Number(TTF)]}) not unlocked (last available: ${lastTrollIdAvailable}), resetting raid selector to "Choose a girl".`);
+            setStoredValue(HHStoredVarPrefixKey + SK.autoLoveRaidSelectedIndex, "0");
+            TTF = 0;
         }
-        if (!trollz.hasOwnProperty(TTF) && !sideTrollz.hasOwnProperty(TTF)) {
+        if (TTF <= 0) {
+            if (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true") {
+                // Only fallback to last troll if normal troll fighting is enabled
+                TTF = lastTrollIdAvailable > 0 ? lastTrollIdAvailable : 1;
+                if (logging)
+                    LogUtils_logHHAuto(`Error: wrong troll target found. Backup to ${TTF}`);
+            }
+            else {
+                // Events/Raids only mode — no target available, skip fight
+                if (logging)
+                    LogUtils_logHHAuto("No event/raid troll target available, skipping.");
+                return 0;
+            }
+        }
+        if (TTF > 0 && !trollz.hasOwnProperty(TTF) && !sideTrollz.hasOwnProperty(TTF)) {
             if (logging)
                 LogUtils_logHHAuto("Error: New troll implemented '" + TTF + "' (List to be updated) or wrong troll target found");
-            TTF = 1;
+            if (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true") {
+                TTF = 1;
+            }
+            else {
+                return 0;
+            }
         }
         return TTF;
     }
@@ -7063,7 +7397,7 @@ class Troll {
             if (currentPower < 1) {
                 const eventGirl = EventModule.getEventGirl();
                 const eventMythicGirl = EventModule.getEventMythicGirl();
-                const loveRaid = LoveRaidManager.getRaidToFight(LoveRaidManager.getTrollRaids(), false);
+                const loveRaid = LoveRaidManager.isAnyActivated() ? LoveRaidManager.getRaidToFight(LoveRaidManager.getTrollRaids(), false) : undefined;
                 //logHHAuto("No power for battle.");
                 if (!Troll.canBuyFight(eventGirl).canBuy && !Troll.canBuyFight(eventMythicGirl).canBuy &&
                     !Troll.canBuyFightForRaid(loveRaid).canBuy) {
@@ -7078,28 +7412,38 @@ class Troll {
             const trollz = ConfigHelper.getHHScriptVars("trollzList");
             const currentPage = getPage();
             if (!TTF || TTF <= 0) {
-                if (getStoredValue(HHStoredVarPrefixKey + TK.TrollInvalid) === "true") {
-                    LogUtils_logHHAuto(`ERROR: Invalid troll N°${TTF}, again, going to first troll`);
-                    TTF = 1;
+                if (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true") {
+                    if (getStoredValue(HHStoredVarPrefixKey + TK.TrollInvalid) === "true") {
+                        LogUtils_logHHAuto(`ERROR: Invalid troll N°${TTF}, again, going to first troll`);
+                        TTF = 1;
+                    }
+                    else {
+                        LogUtils_logHHAuto(`ERROR: Invalid troll N°${TTF}, do not fight, retry...`);
+                        setStoredValue(HHStoredVarPrefixKey + TK.TrollInvalid, "true");
+                        return true;
+                    }
                 }
                 else {
-                    LogUtils_logHHAuto(`ERROR: Invalid troll N°${TTF}, do not fight, retry...`);
-                    setStoredValue(HHStoredVarPrefixKey + TK.TrollInvalid, "true");
-                    return true;
+                    LogUtils_logHHAuto("No troll target found (events/raids only mode), skipping fight.");
+                    return false;
                 }
             }
-            if (Booster.needSandalWoodEquipped(TTF)) {
+            const needSW = Booster.needSandalWoodEquipped(TTF);
+            LogUtils_logHHAuto(`[SW-DEBUG] Troll fight entry: TTF=${TTF}, needSandalWoodEquipped=${needSW}, currentPage=${currentPage}`);
+            if (needSW) {
                 if (currentPage !== ConfigHelper.getHHScriptVars("pagesIDShop")) {
-                    LogUtils_logHHAuto('Go to Shop page to update booster status');
+                    LogUtils_logHHAuto('[SW-DEBUG] Go to Shop page to update booster status');
                     gotoPage(ConfigHelper.getHHScriptVars("pagesIDShop"));
                     return true;
                 }
                 else {
-                    LogUtils_logHHAuto('Updating booster status');
+                    LogUtils_logHHAuto('[SW-DEBUG] On shop page, collecting boosters from market');
                     Booster.collectBoostersFromMarket();
+                    LogUtils_logHHAuto('[SW-DEBUG] Attempting to equip Sandalwood...');
                     const equipped = yield Booster.equipeSandalWoodIfNeeded(TTF);
+                    LogUtils_logHHAuto(`[SW-DEBUG] equipeSandalWoodIfNeeded returned: ${equipped}`);
                     if (equipped) {
-                        LogUtils_logHHAuto('Updating booster status after new booster equipped before fight');
+                        LogUtils_logHHAuto('[SW-DEBUG] Sandalwood newly equipped, refreshing booster status from market');
                         Booster.collectBoostersFromMarket();
                     }
                 }
@@ -7110,7 +7454,7 @@ class Troll {
             //console.log(getPage());
             if (currentPage === ConfigHelper.getHHScriptVars("pagesIDTrollPreBattle") && window.location.search.includes("id_opponent=" + TTF)) {
                 // On the battle screen.
-                Troll.CrushThemFights();
+                yield Troll.CrushThemFights();
                 return true;
             }
             else {
@@ -7127,234 +7471,261 @@ class Troll {
     }
     static CrushThemFights() {
         var _a;
-        if (getPage() === ConfigHelper.getHHScriptVars("pagesIDTrollPreBattle")) {
-            // On battle page.
-            LogUtils_logHHAuto("On Pre battle page.");
-            let TTF = Number(queryStringGetParam(window.location.search, 'id_opponent'));
-            const trollz = ConfigHelper.getHHScriptVars("trollzList");
-            let battleButton = $('#pre-battle .battle-buttons .green_button_L.battle-action-button');
-            let battleButtonX10 = $('#pre-battle .battle-buttons button.autofight[data-battles="10"]');
-            let battleButtonX50 = $('#pre-battle .battle-buttons button.autofight[data-battles="50"]');
-            let battleButtonX10Price = Number(battleButtonX10.attr('price'));
-            let battleButtonX50Price = Number(battleButtonX50.attr('price'));
-            // let Hero=getHero();
-            let hcConfirmValue = getHHVars('Hero.infos.hc_confirm');
-            let previousPower = (_a = getStoredValue(HHStoredVarPrefixKey + TK.trollPoints)) !== null && _a !== void 0 ? _a : 0;
-            let currentPower = Troll.getEnergy();
-            var checkPreviousFightDone = function () {
-                // The goal of this function is to detect slow server response to avoid loop without fight
-                if (previousPower > 0 && previousPower == currentPower) {
-                    setStoredValue(HHStoredVarPrefixKey + TK.autoLoop, "false");
-                    LogUtils_logHHAuto("Server seems slow to reply, setting autoloop to false to wait for troll page to load");
-                }
-            };
-            //check if girl still available at troll in case of event
-            if (TTF !== null) {
-                let eventTrollGirl;
-                const eventGirl = EventModule.getEventGirl();
-                const eventMythicGirl = EventModule.getEventMythicGirl();
-                let loveRaid = null;
-                const rewardGirlz = $("#pre-battle .oponnent-panel .opponent_rewards .rewards_list .slot.girl_ico[data-rewards]");
-                const trollGirlRewards = rewardGirlz.attr('data-rewards') || '';
-                const autoTrollSelectedIndex = Troll.getTrollSelectedIndex();
-                if (eventMythicGirl.girl_id && TTF === eventMythicGirl.troll_id && eventMythicGirl.is_mythic && getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythic) === "true") {
-                    eventTrollGirl = eventMythicGirl;
-                    if (rewardGirlz.length === 0 || !trollGirlRewards.includes('"id_girl":' + eventMythicGirl.girl_id)) {
-                        LogUtils_logHHAuto(`Seems ${eventMythicGirl.name} is no more available at troll ${trollz[Number(TTF)]}. Going to event page.`);
-                        EventModule.parseEventPage(eventMythicGirl.event_id);
-                        return true;
+        return Troll_awaiter(this, void 0, void 0, function* () {
+            if (getPage() === ConfigHelper.getHHScriptVars("pagesIDTrollPreBattle")) {
+                // On battle page.
+                LogUtils_logHHAuto("On Pre battle page.");
+                let TTF = Number(queryStringGetParam(window.location.search, 'id_opponent'));
+                const trollz = ConfigHelper.getHHScriptVars("trollzList");
+                let battleButton = $('#pre-battle .battle-buttons .green_button_L.battle-action-button');
+                let battleButtonX10 = $('#pre-battle .battle-buttons button.autofight[data-battles="10"]');
+                let battleButtonX50 = $('#pre-battle .battle-buttons button.autofight[data-battles="50"]');
+                let battleButtonX10Price = Number(battleButtonX10.attr('price'));
+                let battleButtonX50Price = Number(battleButtonX50.attr('price'));
+                // let Hero=getHero();
+                let hcConfirmValue = getHHVars('Hero.infos.hc_confirm');
+                let previousPower = (_a = getStoredValue(HHStoredVarPrefixKey + TK.trollPoints)) !== null && _a !== void 0 ? _a : 0;
+                let currentPower = Troll.getEnergy();
+                var checkPreviousFightDone = function () {
+                    // The goal of this function is to detect slow server response to avoid loop without fight
+                    if (previousPower > 0 && previousPower == currentPower) {
+                        setStoredValue(HHStoredVarPrefixKey + TK.autoLoop, "false");
+                        LogUtils_logHHAuto("Server seems slow to reply, setting autoloop to false to wait for troll page to load");
                     }
-                }
-                if (eventGirl.girl_id && TTF === eventGirl.troll_id && !eventGirl.is_mythic && getStoredValue(HHStoredVarPrefixKey + SK.plusEvent) === "true") {
-                    eventTrollGirl = eventGirl;
-                    if (rewardGirlz.length === 0 || !trollGirlRewards.includes('"id_girl":' + eventGirl.girl_id)) {
-                        LogUtils_logHHAuto(`Seems ${eventGirl.name} is no more available at troll ${trollz[Number(TTF)]}. Going to event page.`);
-                        EventModule.parseEventPage(eventGirl.event_id);
-                        return true;
+                };
+                //check if girl still available at troll in case of event
+                if (TTF !== null) {
+                    let eventTrollGirl;
+                    const eventGirl = EventModule.getEventGirl();
+                    const eventMythicGirl = EventModule.getEventMythicGirl();
+                    let loveRaid = null;
+                    const rewardGirlz = $("#pre-battle .oponnent-panel .opponent_rewards .rewards_list .slot.girl_ico[data-rewards]");
+                    const trollGirlRewards = rewardGirlz.attr('data-rewards') || '';
+                    const autoTrollSelectedIndex = Troll.getTrollSelectedIndex();
+                    if (eventMythicGirl.girl_id && TTF === eventMythicGirl.troll_id && eventMythicGirl.is_mythic && getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythic) === "true") {
+                        eventTrollGirl = eventMythicGirl;
+                        if (rewardGirlz.length === 0 || !trollGirlRewards.includes('"id_girl":' + eventMythicGirl.girl_id)) {
+                            LogUtils_logHHAuto(`Seems ${eventMythicGirl.name} is no more available at troll ${trollz[Number(TTF)]}. Going to event page.`);
+                            EventModule.parseEventPage(eventMythicGirl.event_id);
+                            return true;
+                        }
                     }
-                }
-                if (rewardGirlz.length === 0 && (autoTrollSelectedIndex === 98 || autoTrollSelectedIndex === 99)) {
-                    LogUtils_logHHAuto(`Seems no more girls available at troll ${trollz[Number(TTF)]}, looking for next troll.`);
-                    let trollWithGirls = getStoredJSON(HHStoredVarPrefixKey + TK.trollWithGirls, []);
-                    trollWithGirls[TTF] = 0;
-                    setStoredValue(HHStoredVarPrefixKey + TK.trollWithGirls, JSON.stringify(trollWithGirls));
-                    const newTroll = Troll.getTrollIdToFight();
-                    if (TTF != newTroll) {
-                        gotoPage(ConfigHelper.getHHScriptVars("pagesIDTrollPreBattle"), { id_opponent: newTroll });
-                        return true;
+                    if (eventGirl.girl_id && TTF === eventGirl.troll_id && !eventGirl.is_mythic && getStoredValue(HHStoredVarPrefixKey + SK.plusEvent) === "true") {
+                        eventTrollGirl = eventGirl;
+                        if (rewardGirlz.length === 0 || !trollGirlRewards.includes('"id_girl":' + eventGirl.girl_id)) {
+                            LogUtils_logHHAuto(`Seems ${eventGirl.name} is no more available at troll ${trollz[Number(TTF)]}. Going to event page.`);
+                            EventModule.parseEventPage(eventGirl.event_id);
+                            return true;
+                        }
                     }
-                    else {
-                        LogUtils_logHHAuto(`Same troll found, go for it.`);
+                    if (rewardGirlz.length === 0 && (autoTrollSelectedIndex === 98 || autoTrollSelectedIndex === 99)) {
+                        LogUtils_logHHAuto(`Seems no more girls available at troll ${trollz[Number(TTF)]}, looking for next troll.`);
+                        let trollWithGirls = getStoredJSON(HHStoredVarPrefixKey + TK.trollWithGirls, []);
+                        trollWithGirls[TTF] = 0;
+                        setStoredValue(HHStoredVarPrefixKey + TK.trollWithGirls, JSON.stringify(trollWithGirls));
+                        const newTroll = Troll.getTrollIdToFight();
+                        if (TTF != newTroll) {
+                            gotoPage(ConfigHelper.getHHScriptVars("pagesIDTrollPreBattle"), { id_opponent: newTroll });
+                            return true;
+                        }
+                        else {
+                            LogUtils_logHHAuto(`Same troll found, go for it.`);
+                        }
                     }
-                }
-                let canBuyFightsResult = Troll.canBuyFight(eventTrollGirl);
-                if ((canBuyFightsResult.canBuy && currentPower === 0)
-                    ||
-                        (canBuyFightsResult.canBuy
-                            && currentPower < 50
-                            && canBuyFightsResult.max === 50
-                            && getStoredValue(HHStoredVarPrefixKey + SK.useX50Fights) === "true"
-                            && ((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic) || getStoredValue(HHStoredVarPrefixKey + SK.useX50FightsAllowNormalEvent) === "true")
-                            && TTF === (eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.troll_id))
-                    ||
-                        (canBuyFightsResult.canBuy
-                            && currentPower < 10
-                            && canBuyFightsResult.max === 20
-                            && getStoredValue(HHStoredVarPrefixKey + SK.useX10Fights) === "true"
-                            && ((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic) || getStoredValue(HHStoredVarPrefixKey + SK.useX10FightsAllowNormalEvent) === "true")
-                            && TTF === (eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.troll_id))) {
-                    Troll.RechargeCombat(canBuyFightsResult);
-                    gotoPage(ConfigHelper.getHHScriptVars("pagesIDTrollPreBattle"), { id_opponent: TTF });
-                    return true;
-                }
-                if (LoveRaidManager.isActivated()) {
-                    loveRaid = LoveRaidManager.getTrollRaids().find(raid => raid.trollId === TTF);
-                    if (loveRaid && (rewardGirlz.length === 0 || !trollGirlRewards.includes('"id_girl":' + loveRaid.id_girl))) {
-                        LogUtils_logHHAuto(`Seems girl ${loveRaid.id_girl} is no more available at troll ${trollz[Number(TTF)]}. Going to love Raid.`);
-                        clearTimer('nextLoveRaidTime');
-                        gotoPage(ConfigHelper.getHHScriptVars("pagesIDLoveRaid"));
-                        return true;
-                    }
-                    const canBuyFightsResultLoveRaid = Troll.canBuyFightForRaid(loveRaid);
-                    if ((canBuyFightsResultLoveRaid.canBuy && currentPower === 0)
+                    let canBuyFightsResult = Troll.canBuyFight(eventTrollGirl);
+                    if ((canBuyFightsResult.canBuy && currentPower === 0)
                         ||
-                            (canBuyFightsResultLoveRaid.canBuy
+                            (canBuyFightsResult.canBuy
                                 && currentPower < 50
-                                && canBuyFightsResultLoveRaid.max === 50
+                                && canBuyFightsResult.max === 50
                                 && getStoredValue(HHStoredVarPrefixKey + SK.useX50Fights) === "true"
-                                && getStoredValue(HHStoredVarPrefixKey + SK.useX50FightsAllowNormalEvent) === "true"
-                                && TTF === (loveRaid === null || loveRaid === void 0 ? void 0 : loveRaid.id_girl))
+                                && ((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic) || getStoredValue(HHStoredVarPrefixKey + SK.useX50FightsAllowNormalEvent) === "true")
+                                && TTF === (eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.troll_id))
                         ||
-                            (canBuyFightsResultLoveRaid.canBuy
+                            (canBuyFightsResult.canBuy
                                 && currentPower < 10
-                                && canBuyFightsResultLoveRaid.max === 20
+                                && canBuyFightsResult.max === 20
                                 && getStoredValue(HHStoredVarPrefixKey + SK.useX10Fights) === "true"
-                                && getStoredValue(HHStoredVarPrefixKey + SK.useX10FightsAllowNormalEvent) === "true"
-                                && TTF === (loveRaid === null || loveRaid === void 0 ? void 0 : loveRaid.id_girl))) {
-                        Troll.RechargeCombat(canBuyFightsResultLoveRaid);
+                                && ((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic) || getStoredValue(HHStoredVarPrefixKey + SK.useX10FightsAllowNormalEvent) === "true")
+                                && TTF === (eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.troll_id))) {
+                        Troll.RechargeCombat(canBuyFightsResult);
                         gotoPage(ConfigHelper.getHHScriptVars("pagesIDTrollPreBattle"), { id_opponent: TTF });
                         return true;
                     }
-                }
-                if ((Number.isInteger(eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.shards) || (loveRaid === null || loveRaid === void 0 ? void 0 : loveRaid.girl_to_win))
-                    && battleButtonX10.length > 0
-                    && battleButtonX50.length > 0
-                    && getStoredValue(HHStoredVarPrefixKey + TK.autoTrollBattleSaveQuest) !== "true") {
-                    const remainingEventShards = eventTrollGirl ? Number(100 - (eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.shards)) : 0;
-                    const remainingLoveRaidShards = loveRaid ? Number(100 - (loveRaid === null || loveRaid === void 0 ? void 0 : loveRaid.girl_shards)) : 0;
-                    const remainingShards = remainingEventShards + remainingLoveRaidShards; // If Troll have both
-                    let bypassThreshold = (((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic)
-                        && canBuyFightsResult.canBuy) // eventGirl available and buy comb true
-                        || ((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic) && getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythic) === "true")
-                        || ((loveRaid === null || loveRaid === void 0 ? void 0 : loveRaid.girl_to_win) && getStoredValue(HHStoredVarPrefixKey + SK.autoTrollLoveRaidByPassThreshold) === "true"));
-                    const minShardsx50 = getStoredValue(HHStoredVarPrefixKey + SK.minShardsX50);
-                    if (getStoredValue(HHStoredVarPrefixKey + SK.useX50Fights) === "true"
-                        && minShardsx50 && Number.isInteger(Number(minShardsx50)) && remainingShards >= Number(minShardsx50)
-                        && (battleButtonX50Price === 0 || HeroHelper.getKoban() >= battleButtonX50Price + Number(getStoredValue(HHStoredVarPrefixKey + SK.kobanBank)))
-                        && currentPower >= 50
-                        && (currentPower >= (Number(getStoredValue(HHStoredVarPrefixKey + SK.autoTrollThreshold)) + 50)
-                            || bypassThreshold)
-                        && ((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic) || getStoredValue(HHStoredVarPrefixKey + SK.useX50FightsAllowNormalEvent) === "true")) {
-                        LogUtils_logHHAuto("Going to crush 50 times: " + trollz[Number(TTF)] + ' for ' + battleButtonX50Price + ' kobans.');
-                        setHHVars('Hero.infos.hc_confirm', true);
-                        // We have the power.
-                        //replaceCheatClick();
-                        battleButtonX50[0].click();
-                        setHHVars('Hero.infos.hc_confirm', hcConfirmValue);
-                        //setStoredValue(HHStoredVarPrefixKey+TK.EventFightsBeforeRefresh", Number(getStoredValue(HHStoredVarPrefixKey+TK.EventFightsBeforeRefresh")) - 50);
-                        LogUtils_logHHAuto(`Crushed 50 times: ${trollz[Number(TTF)]} for ${battleButtonX50Price} kobans.`);
-                        if (getStoredValue(HHStoredVarPrefixKey + TK.questRequirement) === "battle") {
-                            // Battle Done.
-                            setStoredValue(HHStoredVarPrefixKey + TK.questRequirement, "none");
+                    if (LoveRaidManager.isAnyActivated()) {
+                        const trollRaids = LoveRaidManager.getTrollRaids();
+                        loveRaid = trollRaids.find(raid => raid.trollId === TTF);
+                        if (loveRaid && (rewardGirlz.length === 0 || !trollGirlRewards.includes('"id_girl":' + loveRaid.id_girl))) {
+                            LogUtils_logHHAuto(`Seems girl ${loveRaid.id_girl} is no more available at troll ${trollz[Number(TTF)]}. Going to love Raid.`);
+                            clearTimer('nextLoveRaidTime');
+                            gotoPage(ConfigHelper.getHHScriptVars("pagesIDLoveRaid"));
+                            return true;
                         }
-                        RewardHelper.ObserveAndGetGirlRewards();
-                        return;
+                        const canBuyFightsResultLoveRaid = Troll.canBuyFightForRaid(loveRaid);
+                        if ((canBuyFightsResultLoveRaid.canBuy && currentPower === 0)
+                            ||
+                                (canBuyFightsResultLoveRaid.canBuy
+                                    && currentPower < 50
+                                    && canBuyFightsResultLoveRaid.max === 50
+                                    && getStoredValue(HHStoredVarPrefixKey + SK.useX50Fights) === "true"
+                                    && getStoredValue(HHStoredVarPrefixKey + SK.useX50FightsAllowNormalEvent) === "true"
+                                    && TTF === (loveRaid === null || loveRaid === void 0 ? void 0 : loveRaid.id_girl))
+                            ||
+                                (canBuyFightsResultLoveRaid.canBuy
+                                    && currentPower < 10
+                                    && canBuyFightsResultLoveRaid.max === 20
+                                    && getStoredValue(HHStoredVarPrefixKey + SK.useX10Fights) === "true"
+                                    && getStoredValue(HHStoredVarPrefixKey + SK.useX10FightsAllowNormalEvent) === "true"
+                                    && TTF === (loveRaid === null || loveRaid === void 0 ? void 0 : loveRaid.id_girl))) {
+                            Troll.RechargeCombat(canBuyFightsResultLoveRaid);
+                            gotoPage(ConfigHelper.getHHScriptVars("pagesIDTrollPreBattle"), { id_opponent: TTF });
+                            return true;
+                        }
+                    }
+                    if ((Number.isInteger(eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.shards) || (loveRaid === null || loveRaid === void 0 ? void 0 : loveRaid.girl_to_win))
+                        && battleButtonX10.length > 0
+                        && battleButtonX50.length > 0
+                        && getStoredValue(HHStoredVarPrefixKey + TK.autoTrollBattleSaveQuest) !== "true") {
+                        const remainingEventShards = eventTrollGirl ? Number(100 - (eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.shards)) : 0;
+                        const remainingLoveRaidShards = loveRaid ? Number(100 - (loveRaid === null || loveRaid === void 0 ? void 0 : loveRaid.girl_shards)) : 0;
+                        const remainingShards = remainingEventShards + remainingLoveRaidShards; // If Troll have both
+                        let bypassThreshold = (((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic)
+                            && canBuyFightsResult.canBuy) // eventGirl available and buy comb true
+                            || ((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic) && getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythic) === "true")
+                            || ((loveRaid === null || loveRaid === void 0 ? void 0 : loveRaid.girl_to_win) && getStoredValue(HHStoredVarPrefixKey + SK.autoTrollLoveRaidByPassThreshold) === "true"));
+                        // Sandalwood batch-sizing: compute recommended batch based on doses + shards
+                        const dosesRemaining = Booster.getSandalwoodDosesRemaining();
+                        LogUtils_logHHAuto(`[SW-DEBUG] CrushThemFights: eventShards=${remainingEventShards}, raidShards=${remainingLoveRaidShards}, totalRemaining=${remainingShards}, dosesRemaining=${dosesRemaining}, isMythic=${eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic}, power=${currentPower}`);
+                        const recommendedBatch = Booster.getRecommendedBatchSize(Math.min(remainingEventShards || 100, remainingLoveRaidShards || 100), dosesRemaining, {
+                            useX50: getStoredValue(HHStoredVarPrefixKey + SK.useX50Fights) === "true",
+                            useX10: getStoredValue(HHStoredVarPrefixKey + SK.useX10Fights) === "true",
+                            sandalwoodShardsX10Limit: Number(getStoredValue(HHStoredVarPrefixKey + SK.sandalwoodShardsX10Limit)) || 80,
+                            sandalwoodShardsX1Limit: Number(getStoredValue(HHStoredVarPrefixKey + SK.sandalwoodShardsX1Limit)) || 95,
+                            sandalwoodDosesX10Limit: Number(getStoredValue(HHStoredVarPrefixKey + SK.sandalwoodDosesX10Limit)) || 6,
+                            sandalwoodDosesX1Limit: Number(getStoredValue(HHStoredVarPrefixKey + SK.sandalwoodDosesX1Limit)) || 3,
+                        });
+                        LogUtils_logHHAuto(`[SW-DEBUG] CrushThemFights: recommendedBatch=${recommendedBatch}`);
+                        const minShardsx50 = getStoredValue(HHStoredVarPrefixKey + SK.minShardsX50);
+                        if (getStoredValue(HHStoredVarPrefixKey + SK.useX50Fights) === "true"
+                            && minShardsx50 && Number.isInteger(Number(minShardsx50)) && remainingShards >= Number(minShardsx50)
+                            && (battleButtonX50Price === 0 || HeroHelper.getKoban() >= battleButtonX50Price + Number(getStoredValue(HHStoredVarPrefixKey + SK.kobanBank)))
+                            && currentPower >= 50
+                            && (currentPower >= (Number(getStoredValue(HHStoredVarPrefixKey + SK.autoTrollThreshold)) + 50)
+                                || bypassThreshold)
+                            && ((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic) || getStoredValue(HHStoredVarPrefixKey + SK.useX50FightsAllowNormalEvent) === "true")
+                            && recommendedBatch >= 50) {
+                            LogUtils_logHHAuto("Going to crush 50 times: " + trollz[Number(TTF)] + ' for ' + battleButtonX50Price + ' kobans.');
+                            setHHVars('Hero.infos.hc_confirm', true);
+                            // We have the power.
+                            //replaceCheatClick();
+                            Booster.resetBattleResponseFlag();
+                            battleButtonX50[0].click();
+                            setHHVars('Hero.infos.hc_confirm', hcConfirmValue);
+                            //setStoredValue(HHStoredVarPrefixKey+TK.EventFightsBeforeRefresh", Number(getStoredValue(HHStoredVarPrefixKey+TK.EventFightsBeforeRefresh")) - 50);
+                            LogUtils_logHHAuto(`Crushed 50 times: ${trollz[Number(TTF)]} for ${battleButtonX50Price} kobans.`);
+                            if (getStoredValue(HHStoredVarPrefixKey + TK.questRequirement) === "battle") {
+                                // Battle Done.
+                                setStoredValue(HHStoredVarPrefixKey + TK.questRequirement, "none");
+                            }
+                            RewardHelper.ObserveAndGetGirlRewards();
+                            LogUtils_logHHAuto('[SW-DEBUG] x50: waiting for battle response...');
+                            yield Booster.waitForBattleResponse();
+                            LogUtils_logHHAuto('[SW-DEBUG] x50: battle response received, done');
+                            return;
+                        }
+                        else {
+                            if (getStoredValue(HHStoredVarPrefixKey + SK.useX50Fights) === "true") {
+                                const x50BlockedBy = recommendedBatch < 50 ? ` (SW batch cap: ${recommendedBatch})` : '';
+                                LogUtils_logHHAuto(`Unable to use x50 for ${battleButtonX50Price} kobans,fights : ${Troll.getEnergy()}/50, remaining shards : ${remainingShards}/${getStoredValue(HHStoredVarPrefixKey + SK.minShardsX50)}, kobans : ${HeroHelper.getKoban()}/${Number(getStoredValue(HHStoredVarPrefixKey + SK.kobanBank))}${x50BlockedBy}`);
+                            }
+                        }
+                        const minShardsX10 = getStoredValue(HHStoredVarPrefixKey + SK.minShardsX10);
+                        if (getStoredValue(HHStoredVarPrefixKey + SK.useX10Fights) === "true"
+                            && minShardsX10 && Number.isInteger(Number(minShardsX10)) && remainingShards >= Number(minShardsX10)
+                            && (battleButtonX10Price === 0 || HeroHelper.getKoban() >= battleButtonX10Price + Number(getStoredValue(HHStoredVarPrefixKey + SK.kobanBank)))
+                            && currentPower >= 10
+                            && (currentPower >= (Number(getStoredValue(HHStoredVarPrefixKey + SK.autoTrollThreshold)) + 10)
+                                || bypassThreshold)
+                            && ((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic) || getStoredValue(HHStoredVarPrefixKey + SK.useX10FightsAllowNormalEvent) === "true")
+                            && recommendedBatch >= 10) {
+                            LogUtils_logHHAuto(`Going to crush 10 times: ${trollz[Number(TTF)]} for ${battleButtonX10Price} kobans.`);
+                            setHHVars('Hero.infos.hc_confirm', true);
+                            // We have the power.
+                            //replaceCheatClick();
+                            Booster.resetBattleResponseFlag();
+                            battleButtonX10[0].click();
+                            setHHVars('Hero.infos.hc_confirm', hcConfirmValue);
+                            //setStoredValue(HHStoredVarPrefixKey+TK.EventFightsBeforeRefresh", Number(getStoredValue(HHStoredVarPrefixKey+TK.EventFightsBeforeRefresh")) - 10);
+                            LogUtils_logHHAuto(`Crushed 10 times: ${trollz[Number(TTF)]} for ${battleButtonX10Price} kobans.`);
+                            if (getStoredValue(HHStoredVarPrefixKey + TK.questRequirement) === "battle") {
+                                // Battle Done.
+                                setStoredValue(HHStoredVarPrefixKey + TK.questRequirement, "none");
+                            }
+                            RewardHelper.ObserveAndGetGirlRewards();
+                            LogUtils_logHHAuto('[SW-DEBUG] x10: waiting for battle response...');
+                            yield Booster.waitForBattleResponse();
+                            LogUtils_logHHAuto('[SW-DEBUG] x10: battle response received, done');
+                            return;
+                        }
+                        else {
+                            if (getStoredValue(HHStoredVarPrefixKey + SK.useX10Fights) === "true") {
+                                const x10BlockedBy = recommendedBatch < 10 ? ` (SW batch cap: ${recommendedBatch})` : '';
+                                LogUtils_logHHAuto(`Unable to use x10 for ${battleButtonX10Price} kobans,fights : ${Troll.getEnergy()}/10, remaining shards : ${remainingShards}/${getStoredValue(HHStoredVarPrefixKey + SK.minShardsX10)}, kobans : ${HeroHelper.getKoban()}/${Number(getStoredValue(HHStoredVarPrefixKey + SK.kobanBank))}${x10BlockedBy}`);
+                            }
+                        }
+                    }
+                    //Crushing one by one
+                    if (currentPower > 0) {
+                        if ($('#pre-battle div.battle-buttons a.single-battle-button[disabled]').length > 0) {
+                            LogUtils_logHHAuto("Battle Button seems disabled, force reload of page.");
+                            gotoPage(ConfigHelper.getHHScriptVars("pagesIDHome"));
+                            return;
+                        }
+                        if (battleButton === undefined || battleButton.length === 0) {
+                            LogUtils_logHHAuto("Battle Button was undefined. Disabling all auto-battle.");
+                            document.getElementById("autoTrollBattle").checked = false;
+                            setStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle, "false");
+                            //document.getElementById("autoArenaCheckbox").checked = false;
+                            if (getStoredValue(HHStoredVarPrefixKey + TK.questRequirement) === "battle") {
+                                document.getElementById("autoQuest").checked = false;
+                                setStoredValue(HHStoredVarPrefixKey + SK.autoQuest, "false");
+                                LogUtils_logHHAuto("Auto-quest disabled since it requires battle and auto-battle has errors.");
+                            }
+                            return;
+                        }
+                        LogUtils_logHHAuto("Crushing: " + trollz[Number(TTF)]);
+                        //console.log(battleButton);
+                        //replaceCheatClick();
+                        checkPreviousFightDone();
+                        setStoredValue(HHStoredVarPrefixKey + TK.trollPoints, currentPower);
+                        battleButton[0].click();
                     }
                     else {
-                        if (getStoredValue(HHStoredVarPrefixKey + SK.useX50Fights) === "true") {
-                            LogUtils_logHHAuto(`Unable to use x50 for ${battleButtonX50Price} kobans,fights : ${Troll.getEnergy()}/50, remaining shards : ${remainingShards}/${getStoredValue(HHStoredVarPrefixKey + SK.minShardsX50)}, kobans : ${HeroHelper.getKoban()}/${Number(getStoredValue(HHStoredVarPrefixKey + SK.kobanBank))}`);
-                        }
-                    }
-                    const minShardsX10 = getStoredValue(HHStoredVarPrefixKey + SK.minShardsX10);
-                    if (getStoredValue(HHStoredVarPrefixKey + SK.useX10Fights) === "true"
-                        && minShardsX10 && Number.isInteger(Number(minShardsX10)) && remainingShards >= Number(minShardsX10)
-                        && (battleButtonX10Price === 0 || HeroHelper.getKoban() >= battleButtonX10Price + Number(getStoredValue(HHStoredVarPrefixKey + SK.kobanBank)))
-                        && currentPower >= 10
-                        && (currentPower >= (Number(getStoredValue(HHStoredVarPrefixKey + SK.autoTrollThreshold)) + 10)
-                            || bypassThreshold)
-                        && ((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic) || getStoredValue(HHStoredVarPrefixKey + SK.useX10FightsAllowNormalEvent) === "true")) {
-                        LogUtils_logHHAuto(`Going to crush 10 times: ${trollz[Number(TTF)]} for ${battleButtonX10Price} kobans.`);
-                        setHHVars('Hero.infos.hc_confirm', true);
-                        // We have the power.
-                        //replaceCheatClick();
-                        battleButtonX10[0].click();
-                        setHHVars('Hero.infos.hc_confirm', hcConfirmValue);
-                        //setStoredValue(HHStoredVarPrefixKey+TK.EventFightsBeforeRefresh", Number(getStoredValue(HHStoredVarPrefixKey+TK.EventFightsBeforeRefresh")) - 10);
-                        LogUtils_logHHAuto(`Crushed 10 times: ${trollz[Number(TTF)]} for ${battleButtonX10Price} kobans.`);
+                        // We need more power.
+                        const battle_price = 1; // TODO what is the expected value here ?
+                        LogUtils_logHHAuto(`Battle requires ${battle_price} power, having ${currentPower}.`);
+                        setStoredValue(HHStoredVarPrefixKey + TK.battlePowerRequired, battle_price);
                         if (getStoredValue(HHStoredVarPrefixKey + TK.questRequirement) === "battle") {
-                            // Battle Done.
-                            setStoredValue(HHStoredVarPrefixKey + TK.questRequirement, "none");
+                            setStoredValue(HHStoredVarPrefixKey + TK.questRequirement, "P" + battle_price);
                         }
-                        RewardHelper.ObserveAndGetGirlRewards();
-                        return;
-                    }
-                    else {
-                        if (getStoredValue(HHStoredVarPrefixKey + SK.useX10Fights) === "true") {
-                            LogUtils_logHHAuto(`Unable to use x10 for ${battleButtonX10Price} kobans,fights : ${Troll.getEnergy()}/10, remaining shards : ${remainingShards}/${getStoredValue(HHStoredVarPrefixKey + SK.minShardsX10)}, kobans : ${HeroHelper.getKoban()}/${Number(getStoredValue(HHStoredVarPrefixKey + SK.kobanBank))}`);
-                        }
-                    }
-                }
-                //Crushing one by one
-                if (currentPower > 0) {
-                    if ($('#pre-battle div.battle-buttons a.single-battle-button[disabled]').length > 0) {
-                        LogUtils_logHHAuto("Battle Button seems disabled, force reload of page.");
                         gotoPage(ConfigHelper.getHHScriptVars("pagesIDHome"));
                         return;
                     }
-                    if (battleButton === undefined || battleButton.length === 0) {
-                        LogUtils_logHHAuto("Battle Button was undefined. Disabling all auto-battle.");
-                        document.getElementById("autoTrollBattle").checked = false;
-                        setStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle, "false");
-                        //document.getElementById("autoArenaCheckbox").checked = false;
-                        if (getStoredValue(HHStoredVarPrefixKey + TK.questRequirement) === "battle") {
-                            document.getElementById("autoQuest").checked = false;
-                            setStoredValue(HHStoredVarPrefixKey + SK.autoQuest, "false");
-                            LogUtils_logHHAuto("Auto-quest disabled since it requires battle and auto-battle has errors.");
-                        }
-                        return;
-                    }
-                    LogUtils_logHHAuto("Crushing: " + trollz[Number(TTF)]);
-                    //console.log(battleButton);
-                    //replaceCheatClick();
-                    checkPreviousFightDone();
-                    setStoredValue(HHStoredVarPrefixKey + TK.trollPoints, currentPower);
-                    battleButton[0].click();
                 }
                 else {
-                    // We need more power.
-                    const battle_price = 1; // TODO what is the expected value here ?
-                    LogUtils_logHHAuto(`Battle requires ${battle_price} power, having ${currentPower}.`);
-                    setStoredValue(HHStoredVarPrefixKey + TK.battlePowerRequired, battle_price);
-                    if (getStoredValue(HHStoredVarPrefixKey + TK.questRequirement) === "battle") {
-                        setStoredValue(HHStoredVarPrefixKey + TK.questRequirement, "P" + battle_price);
-                    }
-                    gotoPage(ConfigHelper.getHHScriptVars("pagesIDHome"));
-                    return;
+                    checkPreviousFightDone();
+                    setStoredValue(HHStoredVarPrefixKey + TK.trollPoints, currentPower);
+                    //replaceCheatClick();
+                    battleButton[0].click();
                 }
             }
             else {
-                checkPreviousFightDone();
-                setStoredValue(HHStoredVarPrefixKey + TK.trollPoints, currentPower);
-                //replaceCheatClick();
-                battleButton[0].click();
+                LogUtils_logHHAuto('Unable to identify page.');
+                gotoPage(ConfigHelper.getHHScriptVars("pagesIDHome"));
+                return;
             }
-        }
-        else {
-            LogUtils_logHHAuto('Unable to identify page.');
-            gotoPage(ConfigHelper.getHHScriptVars("pagesIDHome"));
             return;
-        }
-        return;
+        });
     }
     static RechargeCombat(canBuyResult) {
         const Hero = getHero();
@@ -7447,7 +7818,7 @@ class Troll {
         let remainingShards;
         if (Number.isInteger(raid === null || raid === void 0 ? void 0 : raid.girl_shards)) {
             if (getStoredValue(HHStoredVarPrefixKey + SK.buyLoveRaidCombat) == "true"
-                && getStoredValue(HHStoredVarPrefixKey + SK.plusLoveRaid) === "true"
+                && LoveRaidManager.isAnyActivated()
                 && raid.seconds_until_event_end > 0 // new Date() < new Date(raid.end_datetime)
                 && raid.id_girl) {
                 //
@@ -7644,7 +8015,7 @@ function getSecondsLeft(name) {
     }
 }
 function getTimeLeft(name) {
-    const timerWaitingCompet = ['nextPachinkoTime', 'nextPachinko2Time', 'nextPachinkoEquipTime', 'nextSeasonTime', 'nextLeaguesTime'];
+    const timerWaitingCompet = ['nextPachinkoTime', 'nextPachinko2Time', 'nextPachinkoEquipTime', 'nextSeasonTime', 'nextLeaguesTime', 'nextChampionTime', 'nextClubChampionTime', 'nextLabyrinthTime', 'nextPentaDrillTime', 'nextPantheonTime'];
     if (!Timers[name]) {
         if (!TimeHelper.canCollectCompetitionActive() && timerWaitingCompet.indexOf(name) >= 0) {
             return "Wait for contest";
@@ -7676,6 +8047,15 @@ function getTimeLeft(name) {
 //
 // Used by: TimerHelper (set/check cooldowns), AutoLoop (scheduling),
 //          InfoService (display remaining times)
+var TimeHelper_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 
 
 
@@ -7718,9 +8098,41 @@ class TimeHelper {
         let seconds = sec_num % 60;
         return JSON.stringify({ days: days, hours: hours, minutes: minutes, seconds: seconds });
     }
+    /**
+     * Pauses execution for a specified duration.
+     * @param waitTime - The number of milliseconds to sleep.
+     * @returns A promise that resolves after the specified wait time.
+     */
     static sleep(waitTime) {
         return new Promise((resolve) => {
             setTimeout(resolve, waitTime);
+        });
+    }
+    /**
+     * Waits for an AJAX request that matches a specified pattern to complete.
+     * It optionally executes a provided action function before starting the wait,
+     * and returns a Promise that resolves to true when the matching AJAX request finishes.
+     *
+     * @param action : An optional function to execute before waiting for the AJAX request. If provided and callable, it runs immediately.
+     * @param ajaxPattern : A string pattern (likely a regex or substring) used to match against the AJAX request's data to identify the specific request to wait for.
+     * @returns A Promise that resolves to true when an AJAX request completes whose data matches the ajaxPattern. The promise remains pending until a matching request finishes.
+     */
+    static waitForAjaxEnd(action, ajaxPattern) {
+        return TimeHelper_awaiter(this, void 0, void 0, function* () {
+            return yield new Promise((resolve) => {
+                if (typeof action === 'function') {
+                    action();
+                }
+                var checkAjaxCompleteOnStartPop = function (event, request, settings) {
+                    let match = settings.data.match(ajaxPattern);
+                    if (match === null)
+                        return;
+                    $(document).off('ajaxComplete', checkAjaxCompleteOnStartPop); // unbind the event to avoid multiple triggers
+                    resolve(true);
+                };
+                // check all ajax responses to find the one corresponding to pattern, then resolve the promise to continue the code execution
+                $(document).on('ajaxComplete', checkAjaxCompleteOnStartPop);
+            });
         });
     }
 }
@@ -7809,6 +8221,10 @@ const SK = {
     useX50FightsAllowNormalEvent: "Setting_useX50FightsAllowNormalEvent",
     minShardsX10: "Setting_minShardsX10",
     minShardsX50: "Setting_minShardsX50",
+    sandalwoodShardsX10Limit: "Setting_sandalwoodShardsX10Limit",
+    sandalwoodShardsX1Limit: "Setting_sandalwoodShardsX1Limit",
+    sandalwoodDosesX10Limit: "Setting_sandalwoodDosesX10Limit",
+    sandalwoodDosesX1Limit: "Setting_sandalwoodDosesX1Limit",
     kobanBank: "Setting_kobanBank",
     buyCombat: "Setting_buyCombat",
     buyCombTimer: "Setting_buyCombTimer",
@@ -7930,9 +8346,12 @@ const SK = {
     paranoia: "Setting_paranoia",
     paranoiaSettings: "Setting_paranoiaSettings",
     paranoiaSpendsBefore: "Setting_paranoiaSpendsBefore",
+    // Girl Skins (applies to Events and Raids)
+    plusGirlSkins: "Setting_plusGirlSkins",
     // Boosters / Events
     plusEvent: "Setting_plusEvent",
     plusEventMythic: "Setting_plusEventMythic",
+    plusEventSandalWood: "Setting_plusEventSandalWood",
     plusEventMythicSandalWood: "Setting_plusEventMythicSandalWood",
     plusLoveRaid: "Setting_plusLoveRaid",
     autoTrollLoveRaidByPassThreshold: "Setting_autoTrollLoveRaidByPassThreshold",
@@ -7965,6 +8384,7 @@ const SK = {
     autoPoVCollectablesList: "Setting_autoPoVCollectablesList",
     // Love Raid
     autoLoveRaidSelectedIndex: "Setting_autoLoveRaidSelectedIndex",
+    plusLoveRaidMythic: "Setting_autoLoveRaidMythicOnly", // now stores min grade (0=off, 3, 5, 6) instead of boolean
     // Bundles
     autoFreeBundlesCollect: "Setting_autoFreeBundlesCollect",
     autoFreeBundlesCollectablesList: "Setting_autoFreeBundlesCollectablesList",
@@ -8092,8 +8512,13 @@ const TK = {
     paranoiaSpendings: "Temp_paranoiaSpendings",
     // Misc
     sandalwoodFailure: "Temp_sandalwoodFailure",
+    sandalwoodMaxUsages: "Temp_sandalwoodMaxUsages",
     unkownPagesList: "Temp_unkownPagesList",
     userLink: "Temp_userLink",
+    // Survey
+    surveyShown: "Temp_surveyShown",
+    surveyDismissCount: "Temp_surveyDismissCount",
+    surveyLastHash: "Temp_surveyLastHash",
 };
 
 ;// CONCATENATED MODULE: ./src/config/HHStoredVars.ts
@@ -9299,6 +9724,61 @@ HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.minShardsX50] =
         menuType: "value",
         kobanUsing: false
     };
+HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.sandalwoodShardsX10Limit] =
+    {
+        default: "80",
+        storage: "Storage()",
+        HHType: "Setting",
+        valueType: "Small Integer",
+        getMenu: true,
+        setMenu: true,
+        menuType: "value",
+        kobanUsing: false
+    };
+HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.sandalwoodShardsX1Limit] =
+    {
+        default: "95",
+        storage: "Storage()",
+        HHType: "Setting",
+        valueType: "Small Integer",
+        getMenu: true,
+        setMenu: true,
+        menuType: "value",
+        kobanUsing: false
+    };
+HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.sandalwoodDosesX10Limit] =
+    {
+        default: "6",
+        storage: "Storage()",
+        HHType: "Setting",
+        valueType: "Small Integer",
+        getMenu: true,
+        setMenu: true,
+        menuType: "value",
+        kobanUsing: false
+    };
+HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.sandalwoodDosesX1Limit] =
+    {
+        default: "3",
+        storage: "Storage()",
+        HHType: "Setting",
+        valueType: "Small Integer",
+        getMenu: true,
+        setMenu: true,
+        menuType: "value",
+        kobanUsing: false
+    };
+HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + TK.sandalwoodMaxUsages] =
+    {
+        default: "11",
+        storage: "sessionStorage",
+        HHType: "Temp",
+        valueType: "Small Integer",
+        getMenu: false,
+        setMenu: false,
+        menuType: "value",
+        kobanUsing: false
+    };
 HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.updateMarket] =
     {
         default: "true",
@@ -9341,6 +9821,17 @@ HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.paranoiaSpendsBefore] =
         menuType: "checked",
         kobanUsing: false
     };
+HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.plusGirlSkins] =
+    {
+        default: "false",
+        storage: "Storage()",
+        HHType: "Setting",
+        valueType: "Boolean",
+        getMenu: true,
+        setMenu: true,
+        menuType: "checked",
+        kobanUsing: false
+    };
 HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.autoTrollLoveRaidByPassThreshold] =
     {
         default: "false",
@@ -9351,6 +9842,19 @@ HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.autoTrollLoveRaidByPassThres
         setMenu: true,
         menuType: "checked",
         kobanUsing: false
+    };
+HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.plusLoveRaidMythic] =
+    {
+        default: "0",
+        storage: "Storage()",
+        HHType: "Setting",
+        valueType: "Small Integer",
+        customMenuID: "raidStarsSelector",
+        getMenu: true,
+        setMenu: true,
+        menuType: "value",
+        kobanUsing: false,
+        isValid: /^[0356]$/
     };
 HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.plusLoveRaid] =
     {
@@ -9379,7 +9883,7 @@ HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.autoLoveRaidSelectedIndex] =
         menuType: "value",
         kobanUsing: false,
         customMenuID: "loveRaidSelector",
-        isValid: /^[0-9]|1[0-5]$/
+        isValid: /^(0|first|\d+_\d+)$/
     };
 HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.buyLoveRaidCombat] =
     {
@@ -9426,6 +9930,17 @@ HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.plusEvent] =
         kobanUsing: false
     };
 HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.plusEventMythic] =
+    {
+        default: "false",
+        storage: "Storage()",
+        HHType: "Setting",
+        valueType: "Boolean",
+        getMenu: true,
+        setMenu: true,
+        menuType: "checked",
+        kobanUsing: false
+    };
+HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.plusEventSandalWood] =
     {
         default: "false",
         storage: "Storage()",
@@ -10511,6 +11026,24 @@ HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + TK.trollPoints] =
         storage: "sessionStorage",
         HHType: "Temp"
     };
+// Survey
+HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + TK.surveyShown] =
+    {
+        default: "false",
+        storage: "localStorage",
+        HHType: "Temp"
+    };
+HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + TK.surveyDismissCount] =
+    {
+        default: "0",
+        storage: "localStorage",
+        HHType: "Temp"
+    };
+HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + TK.surveyLastHash] =
+    {
+        storage: "localStorage",
+        HHType: "Temp"
+    };
 
 ;// CONCATENATED MODULE: ./src/Module/harem/HaremFilter.ts
 var HaremFilter_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -11090,9 +11623,6 @@ class HaremGirl {
             if (getStoredValue(HHStoredVarPrefixKey + SK.showHaremTools) === "true") {
                 HaremGirl.addGirlMenu();
             }
-            if (getStoredValue(HHStoredVarPrefixKey + SK.showHaremSkillsButtons) === "true") {
-                HaremGirl.showSkillButtons();
-            }
         }
         catch ({ errName, message }) {
             LogUtils_logHHAuto(`ERROR: Can't add menu girl: ${errName}, ${message}`);
@@ -11100,7 +11630,7 @@ class HaremGirl {
         }
     }
     static showSkillButtons() {
-        const showSkillButtons = true; // Todo add settings
+        const showSkillButtons = getStoredValue(HHStoredVarPrefixKey + SK.showHaremSkillsButtons) === "true";
         if (showSkillButtons && $('.hhsingleskill').length <= 0) {
             $('.skill-upgrade-row ').each((index, row) => {
                 const rowHasButton = $('button.blue_button_L:not([disabled])', $(row)).length > 0;
@@ -15280,19 +15810,10 @@ class PlaceOfPower {
                     querySelectorText = "button.blue_button_L[rel='pop_action']:not([disabled])";
                     if ($(querySelectorText).length > 0) {
                         LogUtils_logHHAuto("Starting powerplace" + index);
-                        yield new Promise((resolve) => {
+                        // check all ajax responses to find the one corresponding to starting the PoP, then resolve the promise to continue the code execution
+                        yield TimeHelper.waitForAjaxEnd(() => {
                             $(querySelectorText).trigger('click');
-                            var checkAjaxCompleteOnStartPop = function (event, request, settings) {
-                                // namespace=h%5CPlacesOfPower&class=TempPlaceOfPower&action=start&id_place_of_power=00&selected_girls%5B%5D=
-                                let match = settings.data.match(/PlaceOfPower&action=start/);
-                                if (match === null)
-                                    return;
-                                $(document).off('ajaxComplete', checkAjaxCompleteOnStartPop); // unbind the event to avoid multiple triggers
-                                resolve(true);
-                            };
-                            // check all ajax responses to find the one corresponding to starting the PoP, then resolve the promise to continue the code execution
-                            $(document).on('ajaxComplete', checkAjaxCompleteOnStartPop);
-                        });
+                        }, "PlaceOfPower&action=start"); // namespace=h%5CPlacesOfPower&class=TempPlaceOfPower&action=start&id_place_of_power=00&selected_girls%5B%5D=
                     }
                     else if ($("button.blue_button_L[rel='pop_action'][disabled]").length > 0 && $("div.grid_view div.pop_selected").length > 0) {
                         PlaceOfPower.addPopToUnableToStart(index, "Unable to start Pop " + index + " not enough girls available.");
@@ -17591,7 +18112,8 @@ const HHAuto_inputPattern = {
     menuSellNumber: "[0-9]+",
     autoClubChampMax: "[0-9]+",
     menuExpLevel: "[1-4]?[0-9]?[0-9]",
-    minShardsX: "(100|[1-9][0-9]|[0-9])"
+    minShardsX: "(100|[1-9][0-9]|[0-9])",
+    sandalwoodLimit: "(100|[1-9][0-9]|[0-9])"
 };
 
 ;// CONCATENATED MODULE: ./src/config/index.ts
@@ -17680,6 +18202,7 @@ class NumberHelper {
 // HTML template across many files without real benefit.
 //
 // Used by: StartService (on init), AutoLoop (button state refresh)
+
 
 
 
@@ -17791,8 +18314,13 @@ class HHMenu {
     fillLoveRaidSelectMenu() {
         var loveRaidOptions = document.getElementById("loveRaidSelector");
         try {
-            loveRaidOptions.add(this._createHtmlOption('0', getTextForUI("firstEndingRaid", "elementText")));
+            loveRaidOptions.add(this._createHtmlOption('0', getTextForUI("chooseARaid", "elementText")));
+            loveRaidOptions.add(this._createHtmlOption('first', getTextForUI("firstEndingRaid", "elementText")));
+            const lastTrollIdAvailable = Troll.getLastTrollIdAvailable();
             LoveRaidManager.getTrollRaids().forEach((raid) => {
+                if (raid.trollId > lastTrollIdAvailable) {
+                    return; // Skip raids on locked trolls
+                }
                 const option = this._createHtmlOption(raid.trollId + '_' + raid.id_girl, raid.event_name);
                 loveRaidOptions.add(option);
             });
@@ -17821,6 +18349,13 @@ class HHMenu {
         sortsOptions.add(this._createHtmlOption(LeagueHelper.SORT_DISPLAYED, getTextForUI("autoLeaguesdisplayedOrder", "elementText")));
         sortsOptions.add(this._createHtmlOption(LeagueHelper.SORT_POWER, getTextForUI("autoLeaguesPower", "elementText")));
         sortsOptions.add(this._createHtmlOption(LeagueHelper.SORT_POWERCALC, getTextForUI("autoLeaguesPowerCalc", "elementText")));
+    }
+    fillRaidStarsMenu() {
+        var raidStarsOptions = document.getElementById("raidStarsSelector");
+        raidStarsOptions.add(this._createHtmlOption('0', getTextForUI("raidStarsOff", "elementText")));
+        raidStarsOptions.add(this._createHtmlOption('3', getTextForUI("raidStars3", "elementText")));
+        raidStarsOptions.add(this._createHtmlOption('5', getTextForUI("raidStars5", "elementText")));
+        raidStarsOptions.add(this._createHtmlOption('6', getTextForUI("raidStars6", "elementText")));
     }
     fillLabyDifficultyMenu() {
         var sortsOptions = document.getElementById("autoLabyDifficulty");
@@ -18059,6 +18594,7 @@ function getMenu() {
             + `</div>`
             + `<div class="internalOptionsRow" style="padding:3px">`
             + hhButton('saveDefaults', 'saveDefaults')
+            + hhButton('settingsSurvey', 'settingsSurvey')
             + `</div>`
             + `</div>`
             + `<div class="optionsBoxWithTitle">`
@@ -18353,6 +18889,13 @@ function getMenu() {
             + hhMenuSwitch('useX50Fights', '', true)
             + hhMenuSwitch('useX50FightsAllowNormalEvent')
             + hhMenuInput('minShardsX50', HHAuto_inputPattern.minShardsX, 'text-align:center; width:7em')
+            + hhMenuSwitch('plusGirlSkins')
+            + `</div>`
+            + `<div class="internalOptionsRow">`
+            + hhMenuInput('sandalwoodShardsX10Limit', HHAuto_inputPattern.sandalwoodLimit, 'text-align:center; width:7em')
+            + hhMenuInput('sandalwoodShardsX1Limit', HHAuto_inputPattern.sandalwoodLimit, 'text-align:center; width:7em')
+            + hhMenuInput('sandalwoodDosesX10Limit', HHAuto_inputPattern.sandalwoodLimit, 'text-align:center; width:7em')
+            + hhMenuInput('sandalwoodDosesX1Limit', HHAuto_inputPattern.sandalwoodLimit, 'text-align:center; width:7em')
             + `</div>`
             + `<div class="internalOptionsRow">`
             + hhMenuSwitch('plusEvent')
@@ -18360,6 +18903,7 @@ function getMenu() {
             + hhMenuSwitch('buyCombat', '', true)
             + hhMenuInput('autoBuyTrollNumber', HHAuto_inputPattern.autoBuyTrollNumber, 'width:40px')
             + hhMenuInput('buyCombTimer', HHAuto_inputPattern.buyCombTimer, 'text-align:center; width:40px', '', 'numeric')
+            + hhMenuSwitch('plusEventSandalWood')
             + `</div>`
             + `<div class="internalOptionsRow separator">`
             + hhMenuSwitch('plusEventMythic')
@@ -18373,6 +18917,7 @@ function getMenu() {
             + hhMenuSwitch('plusLoveRaid')
             + hhMenuSelect('loveRaidSelector')
             + hhMenuSwitch('autoTrollLoveRaidByPassThreshold')
+            + hhMenuSelect('raidStarsSelector', 'width:75px;')
             + hhMenuSwitch('buyLoveRaidCombat', '', true)
             + hhMenuInput('autoBuyLoveRaidTrollNumber', HHAuto_inputPattern.autoBuyTrollNumber, 'width:40px')
             + hhMenuSwitch('plusEventLoveRaidSandalWood')
@@ -21016,7 +21561,7 @@ function handleMythicWave(ctx) {
     return AutoLoopActions_awaiter(this, void 0, void 0, function* () {
         if (ctx.busy === false && isAutoLoopActive() && ctx.canCollectCompetitionActive
             && getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythic) === "true" && checkTimerMustExist('eventMythicNextWave') && getSecondsLeft("eventMythicGoing") > 0
-            && Troll.isTrollFightActivated()) {
+            && Troll.isEnabled()) {
             LogUtils_logHHAuto("Mythic wave !");
             ctx.lastActionPerformed = "troll";
         }
@@ -21141,7 +21686,7 @@ function handleLoveRaid(ctx) {
             name: "Time to go and check raids.",
             action: "loveraid",
             requiresCompetition: true,
-            isReady: () => LoveRaidManager.isActivated() && checkTimer('nextLoveRaidTime'),
+            isReady: () => LoveRaidManager.isAnyActivated() && checkTimer('nextLoveRaidTime'),
             execute: () => LoveRaidManager.parse(),
         });
     });
@@ -21149,6 +21694,8 @@ function handleLoveRaid(ctx) {
 // 8. handleTrollBattle - lines 374-462 (includes the outer if-block and the else at 459-462)
 function handleTrollBattle(ctx) {
     return AutoLoopActions_awaiter(this, void 0, void 0, function* () {
+        // DEBUG: log preconditions for troll battle
+        LogUtils_logHHAuto(`handleTrollBattle preconditions: busy=${ctx.busy}, isTrollFightActivated=${Troll.isTrollFightActivated()}, autoLoop=${isAutoLoopActive()}, competition=${ctx.canCollectCompetitionActive}, lastAction=${ctx.lastActionPerformed}, power=${ctx.currentPower}`);
         if (ctx.busy === false && Troll.isTrollFightActivated()
             && isAutoLoopActive() && ctx.canCollectCompetitionActive
             && (ctx.lastActionPerformed === "none" || ctx.lastActionPerformed === "troll" || ctx.lastActionPerformed === "quest")) {
@@ -21159,15 +21706,25 @@ function handleTrollBattle(ctx) {
             //logHHAuto("fight amount: "+currentPower+" troll threshold: "+threshold+" paranoia fight: "+Number(checkParanoiaSpendings('fight')));
             const eventGirl = EventModule.getEventGirl();
             const eventMythicGirl = EventModule.getEventMythicGirl();
-            const loveRaid = LoveRaidManager.getRaidToFight();
+            const allTrollRaids = LoveRaidManager.isAnyActivated() ? LoveRaidManager.getTrollRaids() : [];
+            const minRaidStars = LoveRaidManager.getMinRaidStars();
+            const raidStarsFiltered = minRaidStars > 0 ? allTrollRaids.filter(r => r.girlGrade >= minRaidStars) : [];
+            const raidStarsRaid = raidStarsFiltered.length > 0
+                ? LoveRaidManager.getRaidToFight(raidStarsFiltered)
+                : undefined;
+            // +Raid: user-selected girl bypasses grade filter, auto-mode respects it
+            const loveRaid = LoveRaidManager.isActivated()
+                ? LoveRaidManager.getRaidToFight(allTrollRaids)
+                : undefined;
             if (
-            //normal case
-            (ctx.currentPower >= Number(getStoredValue(HHStoredVarPrefixKey + TK.battlePowerRequired))
+            //normal case (only when autoTrollBattle is ON)
+            (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true"
+                && ctx.currentPower >= Number(getStoredValue(HHStoredVarPrefixKey + TK.battlePowerRequired))
                 && ctx.currentPower > 0
                 &&
                     (energyAboveThreshold
                         || getStoredValue(HHStoredVarPrefixKey + TK.autoTrollBattleSaveQuest) === "true"))
-                || ctx.currentPower > 0 && ParanoiaService.checkParanoiaSpendings('fight') > 0 //paranoiaspendings to do
+                || getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true" && ctx.currentPower > 0 && ParanoiaService.checkParanoiaSpendings('fight') > 0 //paranoiaspendings to do
                 ||
                     (
                     // mythic Event Girl available and fights available
@@ -21178,6 +21735,13 @@ function handleTrollBattle(ctx) {
                             ))
                 ||
                     (
+                    // Raid Stars: raid with girl grade >= configured minimum (independent, bypasses threshold)
+                    (raidStarsRaid === null || raidStarsRaid === void 0 ? void 0 : raidStarsRaid.id_girl)
+                        &&
+                            (ctx.currentPower > 0
+                                || Troll.canBuyFightForRaid(raidStarsRaid, false).canBuy))
+                ||
+                    (
                     // normal Event Girl available
                     (eventGirl.girl_id && !eventGirl.is_mythic && getStoredValue(HHStoredVarPrefixKey + SK.plusEvent) === "true")
                         &&
@@ -21186,24 +21750,32 @@ function handleTrollBattle(ctx) {
                             ))
                 ||
                     (
-                    // Love raid available
+                    // +Raid: user-selected Love raid (independent from troll threshold)
                     (LoveRaidManager.isActivated() && (loveRaid === null || loveRaid === void 0 ? void 0 : loveRaid.id_girl))
                         &&
-                            (energyAboveThreshold
-                                || Troll.canBuyFightForRaid(loveRaid, false).canBuy
-                                || (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollLoveRaidByPassThreshold) === "true" && ctx.currentPower > 0)))) {
+                            (ctx.currentPower > 0
+                                || Troll.canBuyFightForRaid(loveRaid, false).canBuy))) {
                 LogUtils_logHHAuto('Troll:', { threshold: threshold, runThreshold: runThreshold, TrollHumanLikeRun: humanLikeRun });
                 setStoredValue(HHStoredVarPrefixKey + TK.battlePowerRequired, "0");
                 ctx.busy = true;
                 if (getStoredValue(HHStoredVarPrefixKey + SK.autoQuest) !== "true" || getStoredValue(HHStoredVarPrefixKey + TK.questRequirement)[0] !== 'P') {
                     ctx.busy = yield Troll.doBossBattle();
-                    ctx.lastActionPerformed = "troll";
+                    if (ctx.busy) {
+                        ctx.lastActionPerformed = "troll";
+                    }
                 }
-                else {
+                else if (getStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle) === "true") {
                     LogUtils_logHHAuto("AutoBattle disabled for power collection for AutoQuest.");
                     document.getElementById("autoTrollBattle").checked = false;
                     setStoredValue(HHStoredVarPrefixKey + SK.autoTrollBattle, "false");
                     ctx.busy = false;
+                }
+                else {
+                    // Events/Raids only mode — quest power collection does not block
+                    ctx.busy = yield Troll.doBossBattle();
+                    if (ctx.busy) {
+                        ctx.lastActionPerformed = "troll";
+                    }
                 }
             }
             else {
@@ -21960,6 +22532,7 @@ function handlePageSpecific(ctx) {
             case ConfigHelper.getHHScriptVars("pagesIDGirlPage"):
                 HaremGirl.moduleHaremGirl = callItOnce(HaremGirl.moduleHaremGirl);
                 HaremGirl.moduleHaremGirl();
+                HaremGirl.showSkillButtons();
                 HaremGirl.run = callItOnce(HaremGirl.run);
                 ctx.busy = yield HaremGirl.run();
                 break;
@@ -22817,6 +23390,246 @@ function reviverMap(key, value) {
     return value;
 }
 
+;// CONCATENATED MODULE: ./src/Service/SurveyService.ts
+// SurveyService.ts
+//
+// One-time settings survey that asks users to anonymously share which
+// settings they actually use. Data is collected to identify unused
+// features that can be removed to reduce complexity.
+//
+// Triggered once after a version upgrade. Users can:
+//   - Share anonymously via Google Form (POST with GM_xmlhttpRequest)
+//   - Copy to clipboard
+//   - Dismiss (permanently) or "Remind me later" (up to 3 times)
+//
+// Only boolean ON/OFF/DEFAULT categories are sent, plus the script
+// version and site hostname. No personal data is collected.
+//
+// Anti-spam: a hash of the settings data is stored after each
+// successful send. Duplicate submissions are silently skipped
+// (the "Thank you" popup still appears to avoid revealing the check).
+
+
+
+const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSe1_iM197Xfq2kEKR2jBA64_r28BpOerTlMywVfMEmsvXvDMQ/formResponse';
+const GOOGLE_FORM_ENTRY = 'entry.875507092';
+const MAX_REMIND_COUNT = 3;
+class SurveyService {
+    /**
+     * Check whether the survey popup should be shown.
+     * Called from StartService after a version upgrade is detected.
+     */
+    static shouldShowSurvey() {
+        const alreadyShown = getStoredValue(HHStoredVarPrefixKey + TK.surveyShown);
+        if (alreadyShown === "true")
+            return false;
+        const dismissCount = Number(getStoredValue(HHStoredVarPrefixKey + TK.surveyDismissCount) || "0");
+        if (dismissCount >= MAX_REMIND_COUNT)
+            return false;
+        return true;
+    }
+    /**
+     * Show the survey popup.
+     */
+    static showSurveyPopup() {
+        const content = SurveyService.buildPopupContent();
+        fillHHPopUp("settingsSurvey", "HHAuto Settings Survey", content);
+        SurveyService.bindPopupEvents();
+    }
+    /**
+     * Build the anonymized settings export string.
+     * Format: one line per setting with key name and status.
+     * Status: ON / OFF / DEFAULT / value (for non-booleans)
+     */
+    static buildSettingsExport() {
+        const lines = [];
+        const version = GM.info.script.version;
+        const site = window.location.hostname;
+        lines.push(`HHAuto Settings Survey`);
+        lines.push(`Version: ${version}`);
+        lines.push(`Site: ${site}`);
+        lines.push(`Date: ${new Date().toISOString().split('T')[0]}`);
+        lines.push(`---`);
+        // Iterate all SK keys (user settings only)
+        for (const keyName of Object.keys(SK)) {
+            const storageKey = HHStoredVarPrefixKey + SK[keyName];
+            const varDef = HHStoredVars_HHStoredVars[storageKey];
+            if (!varDef || varDef.HHType !== "Setting")
+                continue;
+            const currentValue = getStoredValue(storageKey);
+            const defaultValue = varDef.default;
+            let status;
+            if (varDef.valueType === "Boolean") {
+                if (currentValue === defaultValue) {
+                    status = `DEFAULT (${currentValue === "true" ? "ON" : "OFF"})`;
+                }
+                else {
+                    status = currentValue === "true" ? "ON" : "OFF";
+                }
+            }
+            else {
+                if (currentValue === defaultValue) {
+                    status = "DEFAULT";
+                }
+                else {
+                    status = "CHANGED";
+                }
+            }
+            lines.push(`${keyName}: ${status}`);
+        }
+        return lines.join('\n');
+    }
+    /**
+     * Send the export to Google Forms via GM_xmlhttpRequest (bypasses CORS).
+     * Silently skips if settings haven't changed since last submission.
+     */
+    static sendToGoogleForm(data) {
+        // Hash only the settings lines (skip the Date line which changes daily)
+        const hashInput = data.split('\n').filter(l => !l.startsWith('Date:')).join('\n');
+        const hash = SurveyService.hashString(hashInput);
+        const lastHash = getStoredValue(HHStoredVarPrefixKey + TK.surveyLastHash);
+        if (lastHash === hash) {
+            LogUtils_logHHAuto("Settings survey skipped: settings unchanged since last submission.");
+            SurveyService.markAsShown();
+            SurveyService.showThankYou();
+            return;
+        }
+        const formData = `${GOOGLE_FORM_ENTRY}=${encodeURIComponent(data)}`;
+        GM_xmlhttpRequest({
+            method: 'POST',
+            url: GOOGLE_FORM_URL,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data: formData,
+            onload: function (response) {
+                if (response.status === 200) {
+                    LogUtils_logHHAuto("Settings survey submitted successfully via Google Form.");
+                    setStoredValue(HHStoredVarPrefixKey + TK.surveyLastHash, hash);
+                    SurveyService.markAsShown();
+                    SurveyService.showThankYou();
+                }
+                else {
+                    LogUtils_logHHAuto("Settings survey submission failed: " + response.status);
+                    SurveyService.showError();
+                }
+            },
+            onerror: function () {
+                LogUtils_logHHAuto("Settings survey submission error.");
+                SurveyService.showError();
+            }
+        });
+    }
+    /**
+     * Copy the export to clipboard.
+     */
+    static copyToClipboard(data, silent = false) {
+        GM_setClipboard(data, 'text');
+        LogUtils_logHHAuto("Settings survey data copied to clipboard.");
+        if (!silent) {
+            SurveyService.markAsShown();
+            SurveyService.showCopied();
+        }
+    }
+    /**
+     * Mark survey as permanently shown (won't appear again).
+     */
+    static markAsShown() {
+        setStoredValue(HHStoredVarPrefixKey + TK.surveyShown, "true");
+    }
+    /**
+     * Increment dismiss counter for "Remind me later".
+     */
+    static remindLater() {
+        const count = Number(getStoredValue(HHStoredVarPrefixKey + TK.surveyDismissCount) || "0");
+        setStoredValue(HHStoredVarPrefixKey + TK.surveyDismissCount, String(count + 1));
+        LogUtils_logHHAuto(`Settings survey postponed (${count + 1}/${MAX_REMIND_COUNT}).`);
+        maskHHPopUp();
+    }
+    /**
+     * Permanently dismiss the survey.
+     */
+    static dismiss() {
+        SurveyService.markAsShown();
+        LogUtils_logHHAuto("Settings survey permanently dismissed.");
+        maskHHPopUp();
+    }
+    // ── Private helpers ──
+    static buildPopupContent() {
+        const dismissCount = Number(getStoredValue(HHStoredVarPrefixKey + TK.surveyDismissCount) || "0");
+        const remainingReminders = MAX_REMIND_COUNT - dismissCount;
+        return '<div style="padding:10px; max-width:500px; color:#333;">'
+            + '<p style="margin-bottom:10px;">Help us improve HHAuto! We\'d like to know which settings you actually use so we can optimize the script.</p>'
+            + '<p style="margin-bottom:10px; font-size:11px;">This is <b>completely anonymous</b> — we only collect ON/OFF status of settings, your script version, and site name. No personal data or IDs.</p>'
+            + '<p style="margin-bottom:10px; font-size:11px; padding:6px; background:#fff3cd; border:1px solid #ffc107; border-radius:4px;"><b>Note:</b> Tampermonkey may ask for permission to send data. Temporary or one-time rights are sufficient — no need to grant permanent ones.</p>'
+            + '<div style="display:flex; flex-direction:column; gap:8px; margin-top:15px;">'
+            + '<label class="myButton" id="surveyShareAnon" style="text-align:center; cursor:pointer; padding:8px;">&#x1f4e4; Share anonymously (Google Form)</label>'
+            + '<label class="myButton" id="surveyCopy" style="text-align:center; cursor:pointer; padding:8px;">&#x1f4cb; Copy to clipboard</label>'
+            + '</div>'
+            + '<div style="display:flex; justify-content:space-between; margin-top:15px; font-size:11px;">'
+            + (remainingReminders > 0
+                ? '<a id="surveyRemind" href="#" style="color:#666;">Remind me later (' + remainingReminders + ' left)</a>'
+                : '<span></span>')
+            + '<a id="surveyDismiss" href="#" style="color:#999;">Don\'t ask again</a>'
+            + '</div>'
+            + '</div>';
+    }
+    static bindPopupEvents() {
+        const data = SurveyService.buildSettingsExport();
+        $('#surveyShareAnon').off('click').on('click', function () {
+            SurveyService.sendToGoogleForm(data);
+        });
+        $('#surveyCopy').off('click').on('click', function () {
+            SurveyService.copyToClipboard(data);
+        });
+        $('#surveyRemind').off('click').on('click', function (e) {
+            e.preventDefault();
+            SurveyService.remindLater();
+        });
+        $('#surveyDismiss').off('click').on('click', function (e) {
+            e.preventDefault();
+            SurveyService.dismiss();
+        });
+    }
+    static showThankYou() {
+        fillHHPopUp("settingsSurvey", "HHAuto Settings Survey", '<div style="padding:10px; color:#333; text-align:center;">'
+            + '<p style="font-size:16px; margin-bottom:10px;">&#x2705; Thank you!</p>'
+            + '<p>Your settings have been submitted anonymously. This helps us make HHAuto better!</p>'
+            + '</div>');
+    }
+    static showCopied() {
+        fillHHPopUp("settingsSurvey", "HHAuto Settings Survey", '<div style="padding:10px; color:#333; text-align:center;">'
+            + '<p style="font-size:16px; margin-bottom:10px;">&#x1f4cb; Copied!</p>'
+            + '<p>Your settings data has been copied to the clipboard. You can paste it anywhere you like (e.g. a GitHub issue or discussion).</p>'
+            + '</div>');
+    }
+    /**
+     * Simple string hash (djb2). Not cryptographic, just for
+     * detecting whether settings have changed between submissions.
+     */
+    static hashString(str) {
+        let hash = 5381;
+        for (let i = 0; i < str.length; i++) {
+            hash = ((hash << 5) + hash) + str.charCodeAt(i);
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        return String(hash >>> 0); // Unsigned
+    }
+    static showError() {
+        fillHHPopUp("settingsSurvey", "HHAuto Settings Survey", '<div style="padding:10px; color:#333; text-align:center;">'
+            + '<p style="font-size:16px; margin-bottom:10px;">&#x274c; Submission failed</p>'
+            + '<p>Something went wrong. Please try the clipboard option instead.</p>'
+            + '<div style="margin-top:10px;">'
+            + '<label class="myButton" id="surveyErrorCopy" style="text-align:center; cursor:pointer; padding:8px;">&#x1f4cb; Copy to clipboard</label>'
+            + '</div>'
+            + '</div>');
+        const data = SurveyService.buildSettingsExport();
+        $('#surveyErrorCopy').off('click').on('click', function () {
+            SurveyService.copyToClipboard(data);
+        });
+    }
+}
+
 ;// CONCATENATED MODULE: ./src/Service/TooltipService.ts
 // TooltipService.ts
 //
@@ -22906,6 +23719,7 @@ function disableToolTipsDisplay(important = false) {
 
 
 
+
 var started = false;
 var debugMenuID;
 class StartService {
@@ -22915,6 +23729,7 @@ class StartService {
             // run action on new script version
             LogUtils_logHHAuto(`New script version detected from ${previousScriptVersion} to ${GM.info.script.version}`);
             setStoredValue(HHStoredVarPrefixKey + TK.scriptversion, GM.info.script.version);
+            // +Raid Stars migration handled below (outside version check)
             if ('7.26.0' === GM.info.script.version) {
                 // sett all mask rewards to true if any of the previous individual mask rewards where true
                 let maskReward = false;
@@ -23024,6 +23839,20 @@ function start() {
         setTimers(getStoredJSON(HHStoredVarPrefixKey + TK.Timers, {}));
     }
     // clearEventData("onlyCheckEventsHHScript");
+    // Migrate +Raid Stars stored value to grade-based format (runs every load)
+    // Handles: old boolean ("true"/"false"), old selectedIndex ("1"/"2"/"3"), valid grades ("0"/"3"/"5"/"6")
+    const raidStarsVal = getStoredValue(HHStoredVarPrefixKey + SK.plusLoveRaidMythic);
+    if (raidStarsVal !== undefined && raidStarsVal !== null) {
+        const gradeMap = {
+            "true": "6", "false": "0", // old boolean format
+            "1": "3", "2": "5", "4": "5" // old selectedIndex format (1→3★, 2→5★)
+            // "0","3","5","6" are already valid grade values
+        };
+        if (gradeMap[raidStarsVal] !== undefined) {
+            setStoredValue(HHStoredVarPrefixKey + SK.plusLoveRaidMythic, gradeMap[raidStarsVal]);
+            LogUtils_logHHAuto("Migrated +Raid Stars value '" + raidStarsVal + "' → '" + gradeMap[raidStarsVal] + "'");
+        }
+    }
     setDefaults();
     if (getStoredValue(HHStoredVarPrefixKey + SK.mousePause) === "true") {
         bindMouseEvents();
@@ -23065,6 +23894,7 @@ function start() {
     }
     hhAutoMenu.fillTrollSelectMenu(lastTrollIdAvailable);
     hhAutoMenu.fillLoveRaidSelectMenu();
+    hhAutoMenu.fillRaidStarsMenu();
     // Add league options
     hhAutoMenu.fillLeagueSelectMenu();
     hhAutoMenu.fillLeaguSortMenu();
@@ -23196,7 +24026,18 @@ function start() {
         deleteStoredValue(HHStoredVarPrefixKey + TK.LastPageCalled);
     }
     getPage(true);
-    setTimeout(autoLoop, 1000);
+    // Settings survey: show popup on version upgrade, delay autoLoop while visible
+    if (SurveyService.shouldShowSurvey()) {
+        SurveyService.showSurveyPopup();
+        setTimeout(autoLoop, 30000);
+    }
+    else {
+        setTimeout(autoLoop, 1000);
+    }
+    // Manual survey button
+    $("#settingsSurvey").on("click", function () {
+        SurveyService.showSurveyPopup();
+    });
     GM_registerMenuCommand(getTextForUI("translate", "elementText"), manageTranslationPopUp);
 }
 ;
@@ -23221,6 +24062,7 @@ function start() {
  *  - AdsService     -- suppress or relocate in-game ads
  *  - TooltipService -- show/hide HHAuto menu tooltips
  */
+
 
 
 

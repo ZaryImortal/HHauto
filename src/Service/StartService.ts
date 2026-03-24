@@ -82,6 +82,8 @@ import {
 import { AdsService } from './AdsService';
 import { autoLoop, getBurst } from "./AutoLoop";
 import { createPInfo } from "./InfoService";
+import { FeaturePopupService } from "./FeaturePopupService";
+import { SurveyService } from "./SurveyService";
 import {
     bindMouseEvents
 } from "./MouseService";
@@ -98,6 +100,8 @@ export class StartService {
             // run action on new script version
             logHHAuto(`New script version detected from ${previousScriptVersion} to ${GM.info.script.version}`);
             setStoredValue(HHStoredVarPrefixKey + TK.scriptversion, GM.info.script.version);
+
+            // +Raid Stars migration handled below (outside version check)
 
             if ('7.26.0' === GM.info.script.version) {
                 // sett all mask rewards to true if any of the previous individual mask rewards where true
@@ -229,6 +233,22 @@ export function start() {
         setTimers(getStoredJSON(HHStoredVarPrefixKey+TK.Timers, {}));
     }
     // clearEventData("onlyCheckEventsHHScript");
+
+    // Migrate +Raid Stars stored value to grade-based format (runs every load)
+    // Handles: old boolean ("true"/"false"), old selectedIndex ("1"/"2"/"3"), valid grades ("0"/"3"/"5"/"6")
+    const raidStarsVal = getStoredValue(HHStoredVarPrefixKey + SK.plusLoveRaidMythic);
+    if (raidStarsVal !== undefined && raidStarsVal !== null) {
+        const gradeMap: Record<string, string> = {
+            "true": "6", "false": "0",   // old boolean format
+            "1": "3", "2": "5", "4": "5" // old selectedIndex format (1→3★, 2→5★)
+            // "0","3","5","6" are already valid grade values
+        };
+        if (gradeMap[raidStarsVal] !== undefined) {
+            setStoredValue(HHStoredVarPrefixKey + SK.plusLoveRaidMythic, gradeMap[raidStarsVal]);
+            logHHAuto("Migrated +Raid Stars value '" + raidStarsVal + "' → '" + gradeMap[raidStarsVal] + "'");
+        }
+    }
+
     setDefaults();
 
     if (getStoredValue(HHStoredVarPrefixKey+SK.mousePause) === "true") {
@@ -284,6 +304,7 @@ export function start() {
     }
     hhAutoMenu.fillTrollSelectMenu(lastTrollIdAvailable);
     hhAutoMenu.fillLoveRaidSelectMenu();
+    hhAutoMenu.fillRaidStarsMenu();
 
     // Add league options
     hhAutoMenu.fillLeagueSelectMenu();
@@ -439,7 +460,23 @@ export function start() {
         deleteStoredValue(HHStoredVarPrefixKey+TK.LastPageCalled);
     }
     getPage(true);
-    setTimeout(autoLoop,1000);
+
+    // Version-gated popups: show at most one auto-popup, delay autoLoop while visible
+    if (FeaturePopupService.shouldShowPopup()) {
+        FeaturePopupService.showPopup();
+        setTimeout(autoLoop, 30000);
+    } else if (SurveyService.shouldShowSurvey()) {
+        SurveyService.showSurveyPopup();
+        setTimeout(autoLoop, 30000);
+    } else {
+        setTimeout(autoLoop, 1000);
+    }
+
+    // Manual survey button
+    $("#settingsSurvey").on("click", function() {
+        SurveyService.showSurveyPopup();
+    });
+
     GM_registerMenuCommand(getTextForUI("translate","elementText"),manageTranslationPopUp);
 
 };

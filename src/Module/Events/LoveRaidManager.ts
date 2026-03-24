@@ -61,6 +61,19 @@ export class LoveRaidManager {
     }
     static getAllRaids(): LoveRaid[] {
         let raids: LoveRaid[] = getStoredJSON(HHStoredVarPrefixKey + TK.loveRaids, []);
+        // Backfill girlGrade for raids stored before v7.32.2
+        // Old event_name format: "GirlName <Graded>" e.g. "Luna 5" or "Luna 3★"
+        for (const raid of raids) {
+            if (raid.girlGrade === undefined || raid.girlGrade === 0) {
+                const trailingMatch = raid.event_name?.match(/(\d+)\s*★?\s*$/);
+                const trailingNumber = trailingMatch ? Number(trailingMatch[1]) : 0;
+                if (trailingNumber > 0) {
+                    raid.girlGrade = trailingNumber;
+                } else if (raid.isMythic) {
+                    raid.girlGrade = 6;
+                }
+            }
+        }
         return raids;
     }
     static getTrollRaids(): LoveRaid[]{
@@ -80,42 +93,71 @@ export class LoveRaidManager {
         if(!raids || raids.length === 0) {
             raids = LoveRaidManager.getTrollRaids();
         }
+
+        const plusGirlSkins = getStoredValue(HHStoredVarPrefixKey + SK.plusGirlSkins) === "true";
         let raid: LoveRaid | undefined = undefined;
 
-        let autoRaidSelectedIndex = getStoredValue(HHStoredVarPrefixKey + SK.autoLoveRaidSelectedIndex);
+        let autoRaidSelectedIndex: string = getStoredValue(HHStoredVarPrefixKey + SK.autoLoveRaidSelectedIndex);
+        logHHAuto(`getRaidToFight: selector="${autoRaidSelectedIndex}", raids=${raids.length}, raidIds=[${raids.map(r=>r.trollId+'_'+r.id_girl).join(',')}]`);
         if (autoRaidSelectedIndex === undefined || autoRaidSelectedIndex === '') {
-            autoRaidSelectedIndex = 0;
-        } else if(autoRaidSelectedIndex != 0) {
+            autoRaidSelectedIndex = '0';
+        } else if(autoRaidSelectedIndex !== '0' && autoRaidSelectedIndex !== 'first') {
             const autoRaidSelectedIndexArray = autoRaidSelectedIndex.split('_');
             if (autoRaidSelectedIndexArray.length !== 2) {
                 if (logging) logHHAuto('Saved raid index is malformed, resetting to default');
-                autoRaidSelectedIndex = 0;
+                autoRaidSelectedIndex = '0';
             } else {
-                autoRaidSelectedIndex = Number(autoRaidSelectedIndexArray[0]);
-                raid = raids.find(raid => raid.trollId === autoRaidSelectedIndex);
-                if (!raid || raid.id_girl != autoRaidSelectedIndexArray[1]) {
-                    if (logging) logHHAuto('Saved raid is no longer valid or new girl, resetting to default');
-                    autoRaidSelectedIndex = 0;
+                const selectedTrollId = Number(autoRaidSelectedIndexArray[0]);
+                const selectedGirlId = autoRaidSelectedIndexArray[1];
+                raid = raids.find(raid => raid.trollId === selectedTrollId && String(raid.id_girl) === selectedGirlId);
+                if (!raid) {
+                    // Girl not in this filtered list — check ALL troll raids before resetting
+                    const allRaids = LoveRaidManager.getTrollRaids();
+                    const existsElsewhere = allRaids.find(r => r.trollId === selectedTrollId && String(r.id_girl) === selectedGirlId);
+                    if (!existsElsewhere) {
+                        if (logging) logHHAuto('Saved raid is no longer valid, resetting to default');
+                        autoRaidSelectedIndex = '0';
+                    } else {
+                        if (logging) logHHAuto('Selected raid girl not in this filtered list, skipping (not resetting)');
+                    }
                 }
             }
         }
-        if (logging && raid) {
-            logHHAuto(`LoveRaid troll fight: ${raid.trollId} selected  with girl ${raid.id_girl} to win`);
+
+        // Check if selected raid's girl is done (shards complete + skins done or not wanted)
+        if (raid && raid.girl_shards >= 100) {
+            const skinsDone = !raid.skin_to_win;
+            if (!plusGirlSkins || skinsDone) {
+                if (logging) logHHAuto(`Raid girl ${raid.id_girl} completed (shards: ${raid.girl_shards}, skins done: ${skinsDone}, +Girl Skins: ${plusGirlSkins}), resetting selector`);
+                setStoredValue(HHStoredVarPrefixKey + SK.autoLoveRaidSelectedIndex, "0");
+                autoRaidSelectedIndex = '0';
+                raid = undefined;
+            } else {
+                if (logging) logHHAuto(`Raid girl ${raid.id_girl} won but still has skins to collect (+Girl Skins ON)`);
+            }
         }
 
-        if (autoRaidSelectedIndex == 0) {
+        if (logging && raid) {
+            logHHAuto(`LoveRaid troll fight: ${raid.trollId} selected with girl ${raid.id_girl} to win`);
+        }
+
+        // "first" = First ending raid (old default behavior)
+        if (autoRaidSelectedIndex === 'first') {
             const raidWithGirls = raids.filter(raid => raid.girl_shards < 100);
             if (raidWithGirls.length > 0) {
                 raid = raidWithGirls[0];
-            } else raid = raids[0];
-
-            if (logging) {
-                if (raidWithGirls) {
-                    logHHAuto(`LoveRaid troll fight: ${raid.trollId} with girl ${raid.id_girl} to win`);
-                } else {
-                    logHHAuto(`LoveRaid troll fight: ${raid.trollId} with skin for girl ${raid.id_girl} to win`);
-                }
+            } else if (plusGirlSkins) {
+                raid = raids.find(r => r.skin_to_win) || undefined;
             }
+            if (logging && raid) {
+                logHHAuto(`LoveRaid first ending raid: troll ${raid.trollId} with girl ${raid.id_girl}`);
+            }
+        }
+
+        // Default "Choose a girl" (0) = no automatic fight
+        if (autoRaidSelectedIndex === '0') {
+            if (logging) logHHAuto('Raid selector is "Choose a girl" — no automatic raid fight');
+            raid = undefined;
         }
 
         return raid;
@@ -141,7 +183,11 @@ export class LoveRaidManager {
                     if (debugEnabled && kkRaid.girl_data?.shards >= 100) {
                         logHHAuto(`Girl won, may have skin to win, ignore for now`);
                     }
-                    raid.event_name = (kkRaid.girl_data?.name || kkRaid.event_name || kkRaid.id_girl) + ' ' + (kkRaid.girl_data?.Graded || '');
+                    // nb_grades = number of star slots (3=rare, 5=legendary, 6=mythic)
+                    // Graded is a string of star symbols (e.g. "☆☆☆"), graded = completed awakenings
+                    raid.girlGrade = Number(kkRaid.girl_data?.nb_grades) || 0;
+                    raid.isMythic = kkRaid.girl_data?.rarity === 'mythic' || raid.girlGrade >= 6;
+                    raid.event_name = (kkRaid.girl_data?.name || kkRaid.event_name || kkRaid.id_girl) + ' ' + raid.girlGrade + '★';
                     raid.raid_module_type = kkRaid.raid_module_type;
                     raid.seconds_until_event_end = Number(kkRaid.seconds_until_event_end);
                     raid.seconds_until_event_start = Number(kkRaid.seconds_until_event_start);
@@ -151,8 +197,7 @@ export class LoveRaidManager {
                     raid.shards_left = Number(kkRaid.tranche_data.shards_left);
 
                     if (kkRaid.status == 'ongoing' && (kkRaid.girl_data?.source?.anchor_source?.disabled || kkRaid.girl_data?.source?.anchor_win_from?.disabled)) {
-                        logHHAuto(`Raid source not yet available, ignoring raid (${kkRaid.girl_data?.source?.sentence})`);
-                        continue;
+                        logHHAuto(`Raid source display disabled, still parsing raid (${kkRaid.girl_data?.source?.sentence})`);
                     }
 
                     if ($('.raid-card')[index].classList.contains('multiple-girl')) {
@@ -205,6 +250,25 @@ export class LoveRaidManager {
     }
     static isActivated(){
         return LoveRaidManager.isEnabled() && getStoredValue(HHStoredVarPrefixKey + SK.plusLoveRaid) === "true";
+    }
+    /**
+     * Returns the minimum girl grade for +Raid Stars filtering.
+     * Stored value is the grade directly: 0 = off, 3 = rare+, 5 = legendary+, 6 = mythic only.
+     */
+    static getMinRaidStars(): number {
+        if (!LoveRaidManager.isEnabled()) return 0;
+        const val = Number(getStoredValue(HHStoredVarPrefixKey + SK.plusLoveRaidMythic));
+        return isNaN(val) ? 0 : val;
+    }
+    static isRaidStarsActivated(): boolean {
+        return LoveRaidManager.getMinRaidStars() > 0;
+    }
+    /** @deprecated Use isRaidStarsActivated() — kept for backward compat */
+    static isMythicActivated(){
+        return LoveRaidManager.isRaidStarsActivated();
+    }
+    static isAnyActivated(){
+        return LoveRaidManager.isActivated() || LoveRaidManager.isRaidStarsActivated();
     }
     static styles(){
         $('.love-raids-container').removeClass('height-for-ad');

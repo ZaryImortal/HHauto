@@ -19,6 +19,7 @@
 
 import { LabyrinthAuto } from '../Module/LabyrinthAuto';
 import { LeagueHelper } from '../Module/League';
+import { Troll } from '../Module/Troll';
 import { LoveRaidManager } from '../Module/index';
 import { setDefaults } from '../Service/index';
 import { isDisplayedHHPopUp, logHHAuto } from '../Utils/index';
@@ -137,9 +138,14 @@ export class HHMenu {
     fillLoveRaidSelectMenu() {
         var loveRaidOptions = <HTMLSelectElement>document.getElementById("loveRaidSelector");
         try {
-            loveRaidOptions.add(this._createHtmlOption('0', getTextForUI("firstEndingRaid", "elementText")));
+            loveRaidOptions.add(this._createHtmlOption('0', getTextForUI("chooseARaid", "elementText")));
+            loveRaidOptions.add(this._createHtmlOption('first', getTextForUI("firstEndingRaid", "elementText")));
 
+            const lastTrollIdAvailable = Troll.getLastTrollIdAvailable();
             LoveRaidManager.getTrollRaids().forEach((raid:LoveRaid) => {
+                if (raid.trollId > lastTrollIdAvailable) {
+                    return; // Skip raids on locked trolls
+                }
                 const option = this._createHtmlOption(raid.trollId + '_' + raid.id_girl, raid.event_name);
                 loveRaidOptions.add(option);
             });
@@ -169,6 +175,14 @@ export class HHMenu {
         sortsOptions.add(this._createHtmlOption(LeagueHelper.SORT_DISPLAYED, getTextForUI("autoLeaguesdisplayedOrder", "elementText")));
         sortsOptions.add(this._createHtmlOption(LeagueHelper.SORT_POWER, getTextForUI("autoLeaguesPower", "elementText")));
         sortsOptions.add(this._createHtmlOption(LeagueHelper.SORT_POWERCALC, getTextForUI("autoLeaguesPowerCalc", "elementText")));
+    }
+
+    fillRaidStarsMenu() {
+        var raidStarsOptions = <HTMLSelectElement>document.getElementById("raidStarsSelector");
+        raidStarsOptions.add(this._createHtmlOption('0', getTextForUI("raidStarsOff", "elementText")));
+        raidStarsOptions.add(this._createHtmlOption('3', getTextForUI("raidStars3", "elementText")));
+        raidStarsOptions.add(this._createHtmlOption('5', getTextForUI("raidStars5", "elementText")));
+        raidStarsOptions.add(this._createHtmlOption('6', getTextForUI("raidStars6", "elementText")));
     }
 
     fillLabyDifficultyMenu() {
@@ -468,6 +482,7 @@ export function getMenu() {
                 +`</div>`
                 +`<div class="internalOptionsRow" style="padding:3px">`
                     + hhButton('saveDefaults', 'saveDefaults')
+                    + hhButton('settingsSurvey', 'settingsSurvey')
                 +`</div>`
             +`</div>`
             +`<div class="optionsBoxWithTitle">`
@@ -763,6 +778,13 @@ export function getMenu() {
                         + hhMenuSwitch('useX50Fights', '', true)
                         + hhMenuSwitch('useX50FightsAllowNormalEvent')
                         + hhMenuInput('minShardsX50', HHAuto_inputPattern.minShardsX, 'text-align:center; width:7em')
+                        + hhMenuSwitch('plusGirlSkins')
+                    +`</div>`
+                    +`<div class="internalOptionsRow">`
+                        + hhMenuInput('sandalwoodShardsX10Limit', HHAuto_inputPattern.sandalwoodLimit, 'text-align:center; width:7em')
+                        + hhMenuInput('sandalwoodShardsX1Limit', HHAuto_inputPattern.sandalwoodLimit, 'text-align:center; width:7em')
+                        + hhMenuInput('sandalwoodDosesX10Limit', HHAuto_inputPattern.sandalwoodLimit, 'text-align:center; width:7em')
+                        + hhMenuInput('sandalwoodDosesX1Limit', HHAuto_inputPattern.sandalwoodLimit, 'text-align:center; width:7em')
                     +`</div>`
                     +`<div class="internalOptionsRow">`
                         + hhMenuSwitch('plusEvent')
@@ -770,6 +792,7 @@ export function getMenu() {
                         + hhMenuSwitch('buyCombat', '', true)
                         + hhMenuInput('autoBuyTrollNumber', HHAuto_inputPattern.autoBuyTrollNumber, 'width:40px')
                         + hhMenuInput('buyCombTimer', HHAuto_inputPattern.buyCombTimer, 'text-align:center; width:40px', '', 'numeric')
+                        + hhMenuSwitch('plusEventSandalWood')
                     +`</div>`
                     +`<div class="internalOptionsRow separator">`
                         + hhMenuSwitch('plusEventMythic')
@@ -783,6 +806,7 @@ export function getMenu() {
                         + hhMenuSwitch('plusLoveRaid')
                         + hhMenuSelect('loveRaidSelector')
                         + hhMenuSwitch('autoTrollLoveRaidByPassThreshold')
+                        + hhMenuSelect('raidStarsSelector', 'width:75px;')
                         + hhMenuSwitch('buyLoveRaidCombat', '', true)
                         + hhMenuInput('autoBuyLoveRaidTrollNumber', HHAuto_inputPattern.autoBuyTrollNumber, 'width:40px')
                         + hhMenuSwitch('plusEventLoveRaidSandalWood')

@@ -29,6 +29,10 @@ export const SK = {
     useX50FightsAllowNormalEvent: "Setting_useX50FightsAllowNormalEvent",
     minShardsX10: "Setting_minShardsX10",
     minShardsX50: "Setting_minShardsX50",
+    sandalwoodShardsX10Limit: "Setting_sandalwoodShardsX10Limit",
+    sandalwoodShardsX1Limit: "Setting_sandalwoodShardsX1Limit",
+    sandalwoodDosesX10Limit: "Setting_sandalwoodDosesX10Limit",
+    sandalwoodDosesX1Limit: "Setting_sandalwoodDosesX1Limit",
     kobanBank: "Setting_kobanBank",
     buyCombat: "Setting_buyCombat",
     buyCombTimer: "Setting_buyCombTimer",
@@ -167,9 +171,13 @@ export const SK = {
     paranoiaSettings: "Setting_paranoiaSettings",
     paranoiaSpendsBefore: "Setting_paranoiaSpendsBefore",
 
+    // Girl Skins (applies to Events and Raids)
+    plusGirlSkins: "Setting_plusGirlSkins",
+
     // Boosters / Events
     plusEvent: "Setting_plusEvent",
     plusEventMythic: "Setting_plusEventMythic",
+    plusEventSandalWood: "Setting_plusEventSandalWood",
     plusEventMythicSandalWood: "Setting_plusEventMythicSandalWood",
     plusLoveRaid: "Setting_plusLoveRaid",
     autoTrollLoveRaidByPassThreshold: "Setting_autoTrollLoveRaidByPassThreshold",
@@ -207,6 +215,7 @@ export const SK = {
 
     // Love Raid
     autoLoveRaidSelectedIndex: "Setting_autoLoveRaidSelectedIndex",
+    plusLoveRaidMythic: "Setting_autoLoveRaidMythicOnly", // now stores min grade (0=off, 3, 5, 6) instead of boolean
 
     // Bundles
     autoFreeBundlesCollect: "Setting_autoFreeBundlesCollect",
@@ -354,6 +363,16 @@ export const TK = {
 
     // Misc
     sandalwoodFailure: "Temp_sandalwoodFailure",
+    sandalwoodMaxUsages: "Temp_sandalwoodMaxUsages",
     unkownPagesList: "Temp_unkownPagesList",
     userLink: "Temp_userLink",
+
+    // Survey
+    surveyShown: "Temp_surveyShown",
+    surveyDismissCount: "Temp_surveyDismissCount",
+    surveyLastHash: "Temp_surveyLastHash",
+
+    // Feature Popup (What's New)
+    featurePopupShown: "Temp_featurePopupShown",
+    featurePopupDismissCount: "Temp_featurePopupDismissCount",
 } as const;

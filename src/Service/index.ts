@@ -19,6 +19,7 @@
  */
 export * from './AdsService'
 export * from './AutoLoop'
+export * from './FeaturePopupService'
 export * from './AutoLoopActions'
 export * from './AutoLoopContext'
 export * from './AutoLoopPageHandlers'
@@ -27,4 +28,5 @@ export * from './MouseService'
 export * from './ParanoiaService'
 export * from './PageNavigationService'
 export * from './StartService'
+export * from './SurveyService'
 export * from './TooltipService'
