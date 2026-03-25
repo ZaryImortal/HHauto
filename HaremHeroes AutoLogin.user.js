@@ -1,11 +1,19 @@
 // ==UserScript==
-// @name         HaremHeroes Login
+// @name         HHauto Login
 // @namespace    https://github.com/Roukys/HHauto
 // @version      0.3
 // @description  AutoLogin Atualizado
-// @author       Zary
-// @match        https://*.hentaiheroes.com/*
-// @match        https://*.comixheroes.com/*
+// @author       Zary, RuperSama
+// @match        http*://*.haremheroes.com/*
+// @match        http*://*.hentaiheroes.com/*
+// @match        http*://*.gayharem.com/*
+// @match        http*://*.comixharem.com/*
+// @match        http*://*.hornyheroes.com/*
+// @match        http*://*.pornstarharem.com/*
+// @match        http*://*.transpornstarharem.com/*
+// @match        http*://*.gaypornstarharem.com/*
+// @match        http*://*.mangarpg.com/*
+// @match        http*://*.amouragent.com/*
 // @match        https://connect.chibipass.com/*
 // @grant        none
 // ==/UserScript==
