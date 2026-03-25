@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         HHAuto Login
 // @namespace    https://github.com/Roukys/HHauto
-// @version      0.3
-// @description  AutoLogin Atualizado
-// @author       Zary, RuperSama
+// @version      1.0
+// @description  HHAuto Login
+// @author       Zary
 // @match        http*://*.haremheroes.com/*
 // @match        http*://*.hentaiheroes.com/*
 // @match        http*://*.gayharem.com/*
@@ -18,76 +18,107 @@
 // @grant        none
 // ==/UserScript==
 
-var userEmail = "YOUR_EMAIL"; // Seu Email
-var userPass = "YOUR_PASSWORD"; // Sua Senha
+const userEmail = "YOUR_EMAIL";
+const userPass = "YOUR_PASSWORD";
 
-// Função responsável por preencher os dados e logar
-function login() {
-    var email = document.getElementById("auth-email");
-    var pass = document.getElementById("auth-password");
-    var btn = document.getElementById("submit-authenticate");
+// Aguarda elemento aparecer
+function waitForElement(selector, timeout = 10000) {
+    return new Promise((resolve, reject) => {
+        const interval = 200;
+        let elapsed = 0;
 
-    // Verifica se os elementos já carregaram na tela
-    if (email && pass && btn) {
+        const timer = setInterval(() => {
+            const el = document.querySelector(selector);
+            if (el) {
+                clearInterval(timer);
+                resolve(el);
+            }
+
+            elapsed += interval;
+            if (elapsed >= timeout) {
+                clearInterval(timer);
+                reject(`Elemento não encontrado: ${selector}`);
+            }
+        }, interval);
+    });
+}
+
+// LOGIN (ChibiPass)
+async function login() {
+    try {
+        const email = await waitForElement("#auth-email");
+        const pass = await waitForElement("#auth-password");
+        const btn = await waitForElement("#submit-authenticate");
+
         email.value = userEmail;
         pass.value = userPass;
 
-        // Dispara eventos 'input' e 'change' para que o site (React/Vue) reconheça
-        // que o texto foi alterado e destrave o botão automaticamente
-        email.dispatchEvent(new Event('input', { bubbles: true }));
-        email.dispatchEvent(new Event('change', { bubbles: true }));
-        pass.dispatchEvent(new Event('input', { bubbles: true }));
-        pass.dispatchEvent(new Event('change', { bubbles: true }));
+        // Força frameworks (React/Vue) a detectar mudança
+        ["input", "change"].forEach(evt => {
+            email.dispatchEvent(new Event(evt, { bubbles: true }));
+            pass.dispatchEvent(new Event(evt, { bubbles: true }));
+        });
 
-        // Aguarda 1 segundo para garantir que o botão habilitou e clica nele
-        setTimeout(function() {
-            btn.disabled = false; // Força a habilitação por segurança
-            btn.click();
-        }, 1000);
-    } else {
-        // Se a página ainda estiver carregando, tenta novamente em 1 segundo
-        setTimeout(login, 1000);
+        btn.disabled = false;
+        btn.click();
+
+        console.log("Login enviado");
+    } catch (err) {
+        console.error("Erro no login:", err);
     }
 }
 
-// Essa função procura o botão verde (Play) no iFrame do jogo, como no seu script antigo
-function hhFrame() {
-    var iframe = document.getElementById("hh_game");
-    if(iframe == null) {
-        setTimeout(hhFrame, 2000); // Tenta novamente caso o iframe não tenha carregado
+// ENTRAR NO JOGO (iframe)
+function enterGame() {
+    const tryClick = () => {
+        const iframe = document.querySelector("#hh_game");
+        if (!iframe) return false;
+
+        try {
+            const innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+            const btn = innerDoc?.querySelector(".igreen");
+
+            if (btn) {
+                btn.click();
+                console.log("Entrou no jogo");
+                return true;
+            }
+        } catch (e) {
+            // Ignora erro cross-origin
+        }
+
+        return false;
+    };
+
+    const interval = setInterval(() => {
+        if (tryClick()) clearInterval(interval);
+    }, 2000);
+}
+
+// DETECÇÃO INTELIGENTE DE CONTEXTO
+function isLoginPage() {
+    return window.location.hostname.includes("chibipass.com");
+}
+
+function isGamePage() {
+    // Tudo que não for login é jogo (já filtrado pelo @match)
+    return !isLoginPage();
+}
+
+// INIT
+function init() {
+    if (!userEmail || !userPass) {
+        console.warn("Credenciais não definidas");
         return;
     }
 
-    try {
-        var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-        if (innerDoc) {
-            var btns = innerDoc.getElementsByClassName("igreen");
-            if(btns.length > 0){
-                btns[0].click();
-                return; // Para de tentar após clicar
-            }
-        }
-    } catch(error) {
-        // Pode ignorar erros de origin do iframe, tenta novamente
-    }
-
-    setTimeout(hhFrame, 2000);
-}
-
-// Direciona a execução dependendo de onde o script está rodando no momento
-function load() {
-    // Não executa se as credenciais estiverem vazias
-    if(userEmail == "" || userPass == "") return;
-
-    // Se estivermos rodando de dentro do iFrame do ChibiPass (Login)
-    if (window.location.href.includes("chibipass.com")) {
-        setTimeout(login, 1000);
-    }
-    // Se estivermos no site principal do HentaiHeroes
-    else if (window.location.href.includes("hentaiheroes.com")) {
-        setTimeout(hhFrame, 3000); // Aguarda a página principal e foca em entrar no jogo
+    if (isLoginPage()) {
+        login();
+    } else if (isGamePage()) {
+        enterGame();
     }
 }
 
-// Inicia o script quando a página ou iframe terminar de carregar
-window.onload = load;
+// Garante execução mesmo em páginas SPA (React)
+window.addEventListener("load", init);
+document.addEventListener("DOMContentLoaded", init);
