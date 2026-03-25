@@ -5,6 +5,7 @@
 // @description  AutoLogin Atualizado
 // @author       Zary
 // @match        https://*.hentaiheroes.com/*
+// @match        https://*.comixheroes.com/*
 // @match        https://connect.chibipass.com/*
 // @grant        none
 // ==/UserScript==
