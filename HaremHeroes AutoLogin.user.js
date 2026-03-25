@@ -3,7 +3,7 @@
 // @namespace    https://github.com/Roukys/HHauto
 // @version      0.3
 // @description  AutoLogin Atualizado
-// @author       RuperSama, Zary
+// @author       Zary
 // @match        https://*.hentaiheroes.com/*
 // @match        https://connect.chibipass.com/*
 // @grant        none
