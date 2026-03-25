@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         HHauto Login
+// @name         HHAuto Login
 // @namespace    https://github.com/Roukys/HHauto
 // @version      0.3
 // @description  AutoLogin Atualizado
