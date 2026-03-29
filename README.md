@@ -16,42 +16,156 @@ c) TamperMonkey should automatically prompt you to install/update the script. If
 
 ## Latest Updates
 
-### v7.30.0 — Auto-Equip Legendary Boosters
+### v7.34.0 — Smarter Team Selection
 
-A new **Auto-Equip** feature has been added that automatically equips legendary boosters from your inventory when a booster slot is empty or has expired.
+The **"Current Best"** and **"Possible Best"** buttons on the Edit Team page now use an improved team selection algorithm. Instead of simply picking the 16 girls with the highest stat totals, the script now builds an optimized 7-girl team that considers element synergies, leader skill quality, and overall team composition.
 
-**Important: This feature only works with Legendary Boosters (Ginseng, Jujubes, Chlorella, Cordyceps).** It does NOT buy boosters — it only equips what you already have in your inventory.
+#### The Problem (before v7.34.0)
 
-**How it works:**
-- Enable "Auto-Equip" in the Shop menu section
-- Configure which booster to assign to each slot using the "Slot Config" input (e.g. `B1;B1;B2;B4`)
-  - B1 = Ginseng Root, B2 = Jujubes, B3 = Chlorella, B4 = Cordyceps
-- The script checks your active booster slots and equips missing boosters automatically
+The old algorithm ranked every girl individually by their stat sum (carac1 + carac2 + carac3) and showed the top 16. It had no awareness of:
+- **Element synergies** — a team of 7 Fire girls gives +70% crit damage, while a mixed team might give a more balanced but weaker overall bonus
+- **Leader position** — the girl in slot 1 determines the Tier-5 skill for the entire team (Execute, Stun, Shield, or Reflect), but the old algorithm just placed the highest-stat girl there regardless of element
+- **Team composition** — two girls with identical stats but different elements contribute very differently to a team
 
-**Anti-detection timer:**
-After equipping boosters, the script does NOT immediately re-check when they expire. Instead, it waits until the longest active booster expires and then adds a **random delay between 5 minutes and 2 hours** before equipping new ones. This randomized timing is designed to make the automation harder to detect by Kinkoid.
+#### How the New Algorithm Works
 
-**Tested on:**
-- HentaiHeroes
-- ComixHarem
-- PornstarHarem
+**1. Leader Selection (from Top 25)**
 
-Other game variants may work but have not been tested yet. If you encounter issues on other sites, please report them.
+The algorithm first looks at the top 25 girls by stats and selects the best leader based on Tier-5 skill priority:
 
-**⚠ Use at your own risk.** As with all automation features, there is always a risk of being banned by Kinkoid. The random delay helps reduce detection, but cannot guarantee safety.
+| Leader Element | Tier-5 Skill | Priority |
+|---|---|---|
+| Fire / Water | **Execute** (instant kill below HP threshold) | Highest |
+| Sun / Darkness | **Stun** (enemy loses turns) | High |
+| Stone / Light | **Shield** (% of max HP as shield) | Medium |
+| Psychic / Nature | **Reflect** (returns % damage) | Low |
+
+This means the leader may have fewer raw stat points than other team members — that is intentional. An Execute skill can end fights that raw stats alone would lose.
+
+**2. Synergy-Aware Team Building (Slots 2–7)**
+
+After selecting the leader, the algorithm fills the remaining 6 slots one by one. For each slot, it picks the girl that maximizes a combined score of:
+- **Individual stats** (90–95% of the score)
+- **Element synergy bonus** (5–10% of the score) — how much adding this girl's element improves the team's overall bonuses
+
+Element bonuses per girl in the team:
+
+| Element | Bonus per Girl | Effect |
+|---|---|---|
+| Fire (Eccentric) | **+10%** | Critical Hit Damage |
+| Water (Sensual) | +3% | Heal on Hit |
+| Nature (Exhibitionist) | +3% | Ego (HP) |
+| Stone (Physical) | +2% | Critical Hit Chance |
+| Sun (Playful) | +2% | Reduce Enemy Defense |
+| Darkness (Dominatrix) | +2% | Damage |
+| Psychic (Submissive) | +2% | Defense |
+| Light (Voyeur) | +2% | Harmony |
+
+Fire has the highest single-girl impact (+10% vs +2–3%), so the algorithm naturally favors Fire girls when stats are close.
+
+**3. Two Modes**
+
+| Mode | Filter | Score | Use Case |
+|---|---|---|---|
+| **Current Best** | Mythic + Legendary only | Current blessed stats | "What's my strongest team right now?" |
+| **Possible Best** | All girls (including Level 1) | Projected stats at max level + full grades | "Which girls should I invest in?" |
+
+In "Possible Best" mode, a Level 1 Mythic with 6 stars can outrank a fully maxed Epic because its stat ceiling is much higher.
+
+**4. Visual Feedback**
+
+After clicking "Current Best" or "Possible Best", the UI now shows:
+- Element icons on each team member
+- The leader's Tier-5 skill name (e.g. "★ Execute")
+- A synergy info panel with the team's element distribution
+
+#### FAQ
+
+**Q: Why does my leader have fewer points than girl #2?**
+A: The leader determines the Tier-5 skill for the entire team. An Execute leader (Fire/Water) with 29,000 points is stronger than a Reflect leader (Psychic/Nature) with 31,000 points, because Execute can instantly end fights.
+
+**Q: Why does the algorithm only show 7 girls instead of 16?**
+A: The new algorithm optimizes a complete 7-girl team composition. The old algorithm showed 16 individual rankings without team optimization. The 7 girls shown are the optimal team — click "Assign first 7" to use them.
+
+**Q: What if the new algorithm doesn't work on my page?**
+A: The algorithm requires `availableGirls` data, which is only present on the Edit Team page. If the data is not available, the script automatically falls back to the previous algorithm.
 
 ---
 
-### v7.31.1 — League Optimization, Season Max Tier & Place of Power Fix
+### v7.33.1 — Settings Survey
 
-**League Power Calculation Optimization**
-The league power calculation has been optimized for better performance (#1358). The algorithm now evaluates team strength more efficiently, reducing unnecessary computation during league fights.
+A voluntary, anonymous **Settings Survey** has been added to help us understand which features are actually used. With 163 configurable settings and no telemetry, this is the only way to identify unused features we can safely simplify or remove.
 
-**Season: Max Tier Option**
-A new **Max Tier** option has been added to the Season module (#1496). This allows you to set the maximum tier for seasonal events. The option is ignored when "Ignore no girl" is checked, giving you full control over which girls to pursue during seasonal events.
+**How it works:**
+- After a version upgrade, a one-time popup asks you to share your settings
+- You can also trigger it manually via the **"Settings Survey"** button in the menu
+- Two options: **Google Form** (one-click automatic submit) or **Copy to clipboard** (full control)
+- "Remind me later" (up to 3 times) or "Don't ask again" to permanently dismiss
 
-**Place of Power: Wait for Start**
-The script now correctly waits for a Place of Power event to fully start before navigating to the next page. Previously, the script could navigate away too early, causing missed POP events. Combined with a league fix that ensures proper handling of league state transitions.
+**What is collected:**
+- Script version and site hostname
+- For each setting: `ON`, `OFF`, `DEFAULT`, or `CHANGED`
+- **No user IDs, no personal data, no gameplay information**
+
+**Note:** Tampermonkey may ask for permission to send data. Temporary or one-time rights are sufficient — no need to grant permanent ones.
+
+---
+
+### v7.33.0 — Sandalwood Proactive Re-equip & Intelligent Batch Sizing
+
+A new **Proactive Re-equip** system for the Sandalwood Perfume booster (MB1) that automatically detects when the booster is depleted and re-equips a new one from the market — without waiting for the next scheduled booster check. Additionally, the script now intelligently limits fight batch sizes (x50/x10/x1) based on remaining Sandalwood doses to avoid wasting the booster on oversized batches.
+
+#### The Problem (before v7.33.0)
+
+When Sandalwood Perfume expired mid-fight sequence, the script continued fighting without the booster active. This wasted potential shard drops because the game only drops shards when the booster is equipped. Large batch fights (x50/x10) were particularly wasteful — a x50 batch with only 3 doses remaining would consume all doses in the first few fights and run the remaining 47 fights without the booster.
+
+There was also a race condition: the fight logic could proceed before the AJAX response from a batch fight was fully processed, causing dose tracking to be out of sync.
+
+#### How It Works
+
+**1. Dose Tracking**
+
+When Sandalwood is equipped via the market, the script stores the `usages_remaining` value from the server response. After each fight, it tracks how many doses were consumed by analyzing the shard drops:
+- Each shard drop costs exactly 1 dose
+- An **odd** shard count from a batch fight means Sandalwood definitively expired mid-batch
+- An **even** shard count means `shards / 2` doses were consumed (capped at doses available before the fight)
+
+The dose count is stored in sessionStorage and refreshed from the server whenever the market is visited (`collectBoostersFromMarket`).
+
+**2. Proactive Re-equip**
+
+Before each fight, `needSandalWoodEquipped()` checks if the tracked dose count has reached 0. If so, it removes the depleted booster from the internal booster status, which triggers the existing equip logic to visit the market and equip a fresh Sandalwood automatically — no manual intervention needed.
+
+**3. Intelligent Batch Sizing**
+
+The script now calculates the maximum safe batch size before each fight using `getRecommendedBatchSize()`. It picks the **most restrictive** limit from:
+- **Remaining doses**: Not enough doses for a x50? Downgrade to x10. Not enough for x10? Use x1.
+- **Remaining shards until limit**: Close to your shard target? Use smaller batches to avoid overshooting.
+- **User preferences**: Your x50/x10 toggle settings are still respected.
+
+This means the script gradually transitions from x50 → x10 → x1 as Sandalwood runs low, maximizing efficiency.
+
+**4. Race-Condition Fix (Flag+Resolver Pattern)**
+
+For batch fights (x50/x10), the script now uses a synchronization mechanism:
+- `resetBattleResponseFlag()` is called before clicking the fight button
+- `waitForBattleResponse()` pauses until the AJAX response is fully processed (with a 30s timeout)
+- This ensures dose tracking is always up-to-date before the next batch decision
+
+#### New Settings
+
+Four configurable thresholds control when batch downsizing kicks in:
+
+| Setting | Default | Purpose |
+|---------|---------|---------|
+| SW Shards x10 Limit | 80 | Shards collected before downgrading from x10 to x1 |
+| SW Shards x1 Limit | 95 | Shards collected before stopping x1 fights |
+| SW Doses x10 Limit | 6 | Minimum doses required to use x10 batch |
+| SW Doses x1 Limit | 3 | Minimum doses required to use x1 batch |
+
+#### Debug Logging
+
+This release includes temporary `[SW-DEBUG]` tagged console logging throughout the Sandalwood flow. This logging covers dose tracking, batch-size decisions, re-equip triggers, and AJAX synchronization. It will be removed once the feature has been fully validated in production.
 
 ---
 
@@ -131,75 +245,39 @@ With this setup, the script will **never** fight a normal troll or a low-rarity 
 
 ---
 
-### v7.33.0 — Sandalwood Proactive Re-equip & Intelligent Batch Sizing
+### v7.31.1 — League Optimization, Season Max Tier & Place of Power Fix
 
-A new **Proactive Re-equip** system for the Sandalwood Perfume booster (MB1) that automatically detects when the booster is depleted and re-equips a new one from the market — without waiting for the next scheduled booster check. Additionally, the script now intelligently limits fight batch sizes (x50/x10/x1) based on remaining Sandalwood doses to avoid wasting the booster on oversized batches.
+**League Power Calculation Optimization**
+The league power calculation has been optimized for better performance (#1358). The algorithm now evaluates team strength more efficiently, reducing unnecessary computation during league fights.
 
-#### The Problem (before v7.33.0)
+**Season: Max Tier Option**
+A new **Max Tier** option has been added to the Season module (#1496). This allows you to set the maximum tier for seasonal events. The option is ignored when "Ignore no girl" is checked, giving you full control over which girls to pursue during seasonal events.
 
-When Sandalwood Perfume expired mid-fight sequence, the script continued fighting without the booster active. This wasted potential shard drops because the game only drops shards when the booster is equipped. Large batch fights (x50/x10) were particularly wasteful — a x50 batch with only 3 doses remaining would consume all doses in the first few fights and run the remaining 47 fights without the booster.
+**Place of Power: Wait for Start**
+The script now correctly waits for a Place of Power event to fully start before navigating to the next page. Previously, the script could navigate away too early, causing missed POP events. Combined with a league fix that ensures proper handling of league state transitions.
 
-There was also a race condition: the fight logic could proceed before the AJAX response from a batch fight was fully processed, causing dose tracking to be out of sync.
+---
 
-#### How It Works
+### v7.30.0 — Auto-Equip Legendary Boosters
 
-**1. Dose Tracking**
+A new **Auto-Equip** feature has been added that automatically equips legendary boosters from your inventory when a booster slot is empty or has expired.
 
-When Sandalwood is equipped via the market, the script stores the `usages_remaining` value from the server response. After each fight, it tracks how many doses were consumed by analyzing the shard drops:
-- Each shard drop costs exactly 1 dose
-- An **odd** shard count from a batch fight means Sandalwood definitively expired mid-batch
-- An **even** shard count means `shards / 2` doses were consumed (capped at doses available before the fight)
-
-The dose count is stored in sessionStorage and refreshed from the server whenever the market is visited (`collectBoostersFromMarket`).
-
-**2. Proactive Re-equip**
-
-Before each fight, `needSandalWoodEquipped()` checks if the tracked dose count has reached 0. If so, it removes the depleted booster from the internal booster status, which triggers the existing equip logic to visit the market and equip a fresh Sandalwood automatically — no manual intervention needed.
-
-**3. Intelligent Batch Sizing**
-
-The script now calculates the maximum safe batch size before each fight using `getRecommendedBatchSize()`. It picks the **most restrictive** limit from:
-- **Remaining doses**: Not enough doses for a x50? Downgrade to x10. Not enough for x10? Use x1.
-- **Remaining shards until limit**: Close to your shard target? Use smaller batches to avoid overshooting.
-- **User preferences**: Your x50/x10 toggle settings are still respected.
-
-This means the script gradually transitions from x50 → x10 → x1 as Sandalwood runs low, maximizing efficiency.
-
-**4. Race-Condition Fix (Flag+Resolver Pattern)**
-
-For batch fights (x50/x10), the script now uses a synchronization mechanism:
-- `resetBattleResponseFlag()` is called before clicking the fight button
-- `waitForBattleResponse()` pauses until the AJAX response is fully processed (with a 30s timeout)
-- This ensures dose tracking is always up-to-date before the next batch decision
-
-#### New Settings
-
-Four configurable thresholds control when batch downsizing kicks in:
-
-| Setting | Default | Purpose |
-|---------|---------|---------|
-| SW Shards x10 Limit | 80 | Shards collected before downgrading from x10 to x1 |
-| SW Shards x1 Limit | 95 | Shards collected before stopping x1 fights |
-| SW Doses x10 Limit | 6 | Minimum doses required to use x10 batch |
-| SW Doses x1 Limit | 3 | Minimum doses required to use x1 batch |
-
-#### Debug Logging
-
-This release includes temporary `[SW-DEBUG]` tagged console logging throughout the Sandalwood flow. This logging covers dose tracking, batch-size decisions, re-equip triggers, and AJAX synchronization. It will be removed once the feature has been fully validated in production.
-
-#### v7.33.1 — Settings Survey
-
-A voluntary, anonymous **Settings Survey** has been added to help us understand which features are actually used. With 163 configurable settings and no telemetry, this is the only way to identify unused features we can safely simplify or remove.
+**Important: This feature only works with Legendary Boosters (Ginseng, Jujubes, Chlorella, Cordyceps).** It does NOT buy boosters — it only equips what you already have in your inventory.
 
 **How it works:**
-- After a version upgrade, a one-time popup asks you to share your settings
-- You can also trigger it manually via the **"Settings Survey"** button in the menu
-- Two options: **Google Form** (one-click automatic submit) or **Copy to clipboard** (full control)
-- "Remind me later" (up to 3 times) or "Don't ask again" to permanently dismiss
+- Enable "Auto-Equip" in the Shop menu section
+- Configure which booster to assign to each slot using the "Slot Config" input (e.g. `B1;B1;B2;B4`)
+  - B1 = Ginseng Root, B2 = Jujubes, B3 = Chlorella, B4 = Cordyceps
+- The script checks your active booster slots and equips missing boosters automatically
 
-**What is collected:**
-- Script version and site hostname
-- For each setting: `ON`, `OFF`, `DEFAULT`, or `CHANGED`
-- **No user IDs, no personal data, no gameplay information**
+**Anti-detection timer:**
+After equipping boosters, the script does NOT immediately re-check when they expire. Instead, it waits until the longest active booster expires and then adds a **random delay between 5 minutes and 2 hours** before equipping new ones. This randomized timing is designed to make the automation harder to detect by Kinkoid.
 
-**Note:** Tampermonkey may ask for permission to send data. Temporary or one-time rights are sufficient — no need to grant permanent ones.
+**Tested on:**
+- HentaiHeroes
+- ComixHarem
+- PornstarHarem
+
+Other game variants may work but have not been tested yet. If you encounter issues on other sites, please report them.
+
+**⚠ Use at your own risk.** As with all automation features, there is always a risk of being banned by Kinkoid. The random delay helps reduce detection, but cannot guarantee safety.
