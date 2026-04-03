@@ -91,6 +91,9 @@ import { disableToolTipsDisplay, enableToolTipsDisplay, manageToolTipsDisplay } 
 
 var started=false;
 var debugMenuID;
+var heroRetryTimer: ReturnType<typeof setTimeout> | null = null;
+var heroRetryCount = 0;
+const HERO_MAX_RETRIES = 15;
 
 export class StartService {
     static checkVersion()
@@ -194,11 +197,22 @@ export function start() {
 
     if (unsafeWindow.shared?.Hero === undefined)
     {
-        logHHAuto('???no Hero???');
-        $('.hh_logo').trigger('click');
-        setTimeout(hardened_start,5000);
+        heroRetryCount++;
+        if (heroRetryCount > HERO_MAX_RETRIES) {
+            logHHAuto('Hero object not available after ' + HERO_MAX_RETRIES + ' retries. Giving up. Try reloading the page.');
+            return;
+        }
+        logHHAuto('???no Hero??? (attempt ' + heroRetryCount + '/' + HERO_MAX_RETRIES + ')');
+        started = false;
+        heroRetryTimer = setTimeout(hardened_start, 5000);
         return;
     }
+    // Hero available, cancel any pending retry and reset counter
+    if (heroRetryTimer !== null) {
+        clearTimeout(heroRetryTimer);
+        heroRetryTimer = null;
+    }
+    heroRetryCount = 0;
     if($("a[rel='phoenix_member_login']").length > 0)
     {    
         logHHAuto('Not logged in, please login first!');
@@ -461,16 +475,16 @@ export function start() {
     }
     getPage(true);
 
-    // Version-gated popups: show at most one auto-popup, delay autoLoop while visible
+    // Version-gated popups: show but don't block autoLoop
     if (FeaturePopupService.shouldShowPopup()) {
         FeaturePopupService.showPopup();
-        setTimeout(autoLoop, 30000);
-    } else if (SurveyService.shouldShowSurvey()) {
-        SurveyService.showSurveyPopup();
-        setTimeout(autoLoop, 30000);
-    } else {
-        setTimeout(autoLoop, 1000);
     }
+
+    if (SurveyService.shouldShowSurvey()) {
+        SurveyService.showSurveyPopup();
+    }
+
+    setTimeout(autoLoop, 1000);
 
     // Manual survey button
     $("#settingsSurvey").on("click", function() {
