@@ -4476,10 +4476,13 @@ class Season {
                     if (girlShardsReward.length > 0) {
                         LogUtils_logHHAuto("Girl shard reward found for chosen opponent");
                     }
-                    if (stopIfNoEventGirl && girlShardsReward.length <= 0) {
-                        LogUtils_logHHAuto("Ignoring season fights as no girl to win on fight reward");
+                    if (stopIfNoEventGirl && girlShardsReward.length <= 0 && maxTierReached) {
+                        LogUtils_logHHAuto("Max tier reached and no girl to win on fight reward, ignoring season fights.");
                         setTimer('nextSeasonTime', randomInterval(30 * 60, 35 * 60));
                         return false;
+                    }
+                    if (stopIfNoEventGirl && girlShardsReward.length <= 0 && !maxTierReached) {
+                        LogUtils_logHHAuto("Below max tier, fighting regardless of event girls.");
                     }
                     if (runThreshold > 0) {
                         setStoredValue(HHStoredVarPrefixKey + TK.SeasonHumanLikeRun, "true");
