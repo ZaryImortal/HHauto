@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HaremHeroes Automatic++
 // @namespace    https://github.com/Roukys/HHauto
-// @version      7.34.12
+// @version      7.35.2
 // @description  Open the menu in HaremHeroes(topright) to toggle AutoControlls. Supports AutoSalary, AutoContest, AutoMission, AutoQuest, AutoTrollBattle, AutoArenaBattle and AutoPachinko(Free), AutoLeagues, AutoChampions and AutoStatUpgrades. Messages are printed in local console.
 // @author       JD and Dorten(a bit), Roukys, cossname, YotoTheOne, CLSchwab, deuxge, react31, PrimusVox, OldRon1977, tsokh, UncleBob800
 // @match        http*://*.haremheroes.com/*
@@ -440,10 +440,7 @@ HHAuto_ToolTips.en['useX50FightsAllowNormalEvent'] = { version: "5.6.24", elemen
 HHAuto_ToolTips.en['autoBuy'] = { version: "5.6.24", elementText: "Market" };
 HHAuto_ToolTips.en['minShardsX50'] = { version: "5.6.24", elementText: "Min. shards x50", tooltip: "Only use x50 button if remaining shards of current girl is equal or above this limit." };
 HHAuto_ToolTips.en['minShardsX10'] = { version: "5.6.24", elementText: "Min. shards x10", tooltip: "Only use x10 button if remaining shards of current girl is equal or above this limit." };
-HHAuto_ToolTips.en['sandalwoodShardsX10Limit'] = { version: "7.33.0", elementText: "SW shards x10 limit", tooltip: "When collected shards reach this percentage, downgrade from x50 to x10 battles to avoid wasting Sandalwood doses." };
-HHAuto_ToolTips.en['sandalwoodShardsX1Limit'] = { version: "7.33.0", elementText: "SW shards x1 limit", tooltip: "When collected shards reach this percentage, downgrade from x10 to x1 battles to avoid wasting Sandalwood doses." };
-HHAuto_ToolTips.en['sandalwoodDosesX10Limit'] = { version: "7.33.0", elementText: "SW doses x10 limit", tooltip: "When remaining Sandalwood doses drop to this number or below, downgrade from x50 to x10 battles." };
-HHAuto_ToolTips.en['sandalwoodDosesX1Limit'] = { version: "7.33.0", elementText: "SW doses x1 limit", tooltip: "When remaining Sandalwood doses drop to this number or below, downgrade from x10 to x1 battles." };
+HHAuto_ToolTips.en['sandalwoodMinShardsThreshold'] = { version: "7.34.16", elementText: "SW min shards", tooltip: "Stop equipping Sandalwood when remaining shards fall to this value or below. 0 = always equip Sandalwood." };
 HHAuto_ToolTips.en['mythicGirlNext'] = { version: "5.6.24", elementText: "Mythic girl wave" };
 HHAuto_ToolTips.en['RefreshOppoList'] = { version: "5.6.24", elementText: "Refresh Opponent list", tooltip: "Allow to force a refresh of opponent list." };
 HHAuto_ToolTips.en['HideBeatenOppo'] = { version: "5.7.1", elementText: "Hide", tooltip: "Allow to hide beaten opponent from the list." };
@@ -668,10 +665,7 @@ HHAuto_ToolTips.fr['useX50Fights'] = { version: "5.6.24", elementText: "Combats 
 HHAuto_ToolTips.fr['autoBuy'] = { version: "5.6.24", elementText: "Marché" };
 HHAuto_ToolTips.fr['minShardsX50'] = { version: "5.6.24", elementText: "Frags min. x50", tooltip: "Utiliser le bouton x50 si le nombre de fragments restant est supérieur ou égal à..." };
 HHAuto_ToolTips.fr['minShardsX10'] = { version: "5.6.24", elementText: "Frags min. x10", tooltip: "Utiliser le bouton x10 si le nombre de fragments restant est supérieur ou égal à..." };
-HHAuto_ToolTips.fr['sandalwoodShardsX10Limit'] = { version: "7.33.0", elementText: "SW frags x10 limite", tooltip: "Quand les fragments collectés atteignent ce pourcentage, réduire de x50 à x10 combats pour éviter le gaspillage de doses Sandalwood." };
-HHAuto_ToolTips.fr['sandalwoodShardsX1Limit'] = { version: "7.33.0", elementText: "SW frags x1 limite", tooltip: "Quand les fragments collectés atteignent ce pourcentage, réduire de x10 à x1 combats pour éviter le gaspillage de doses Sandalwood." };
-HHAuto_ToolTips.fr['sandalwoodDosesX10Limit'] = { version: "7.33.0", elementText: "SW doses x10 limite", tooltip: "Quand les doses Sandalwood restantes descendent à ce nombre ou en dessous, réduire de x50 à x10 combats." };
-HHAuto_ToolTips.fr['sandalwoodDosesX1Limit'] = { version: "7.33.0", elementText: "SW doses x1 limite", tooltip: "Quand les doses Sandalwood restantes descendent à ce nombre ou en dessous, réduire de x10 à x1 combats." };
+HHAuto_ToolTips.fr['sandalwoodMinShardsThreshold'] = { version: "7.34.16", elementText: "SW frags min.", tooltip: "Ne plus équiper Sandalwood quand les fragments restants atteignent cette valeur ou moins. 0 = toujours équiper Sandalwood." };
 HHAuto_ToolTips.fr['autoMissionKFirst'] = { version: "5.6.24", elementText: "Prioriser Kobans", tooltip: "Si activé : commence par les missions qui rapportent des kobans." };
 HHAuto_ToolTips.fr['povpogTitle'] = { version: "5.6.133", elementText: "Voie de la Valeur/Gloire" };
 HHAuto_ToolTips.fr['skills'] = { version: "7.16.0", elementText: "Compétences" };
@@ -780,6 +774,7 @@ HHAuto_ToolTips.de['autoAff'] = { version: "5.6.24", elementText: "Min Geld verb
 HHAuto_ToolTips.de['maxAff'] = { version: "5.6.24", elementText: "Max AnziehungKauf", tooltip: "Maximum an Anziehung die gekauft wird" };
 HHAuto_ToolTips.de['OpponentListBuilding'] = { version: "5.6.24", elementText: "Gegnerliste wird erstellt", tooltip: "" };
 HHAuto_ToolTips.de['OpponentParsed'] = { version: "5.6.24", elementText: "Gegner analysiert", tooltip: "" };
+HHAuto_ToolTips.de['sandalwoodMinShardsThreshold'] = { version: "7.34.16", elementText: "SW min. Shards", tooltip: "Kein Sandalwood mehr ausrüsten, wenn verbleibende Shards diesen Wert erreichen oder unterschreiten. 0 = Sandalwood immer ausrüsten." };
 HHAuto_ToolTips.de['povTitle'] = { version: "5.20.3", elementText: "Pfad der Tapferkeit (PoV)" };
 HHAuto_ToolTips.de['pogTitle'] = { version: "5.20.3", elementText: "Pfad des Ruhmes (PoG)" };
 
@@ -1659,6 +1654,14 @@ class Booster {
             }
         }
     }
+    /**
+     * Returns the user-configured minimum shards threshold for Sandalwood.
+     * When remaining shards fall to this value or below, Sandalwood won't be equipped.
+     * Default 0 = always equip Sandalwood.
+     */
+    static getSandalwoodMinShardsThreshold() {
+        return Number(getStoredValue(HHStoredVarPrefixKey + SK.sandalwoodMinShardsThreshold)) || 0;
+    }
     static needSandalWoodEvent(nextTrollChoosen, eventGirl = null) {
         if (!eventGirl) {
             eventGirl = EventModule.getEventGirl();
@@ -1668,19 +1671,21 @@ class Booster {
         const activated = getStoredValue(HHStoredVarPrefixKey + SK.plusEvent) === "true" && getStoredValue(HHStoredVarPrefixKey + SK.plusEventSandalWood) === "true";
         const correctTrollTargetted = eventGirl.troll_id == nextTrollChoosen;
         const remainingShards = Number(100 - Number(eventGirl.shards));
-        if (remainingShards <= 10) {
-            LogUtils_logHHAuto(`[SW-DEBUG] Not equipping sandalwood for event, only ${remainingShards} shards remaining`);
+        const threshold = Booster.getSandalwoodMinShardsThreshold();
+        if (remainingShards <= threshold) {
+            LogUtils_logHHAuto(`[SW-DEBUG] Not equipping sandalwood for event, only ${remainingShards} shards remaining (threshold: ${threshold})`);
         }
-        return activated && correctTrollTargetted && remainingShards > 10;
+        return activated && correctTrollTargetted && remainingShards > threshold;
     }
     static needSandalWoodMythic(nextTrollChoosen, eventMythicGirl = null) {
         const activated = getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythic) === "true" && getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythicSandalWood) === "true";
         const correctTrollTargetted = eventMythicGirl.is_mythic && eventMythicGirl.troll_id == nextTrollChoosen;
         const remainingShards = Number(100 - Number(eventMythicGirl.shards));
-        if (remainingShards <= 10) {
-            LogUtils_logHHAuto(`[SW-DEBUG] Not equipping sandalwood for mythic, only ${remainingShards} shards remaining`);
+        const threshold = Booster.getSandalwoodMinShardsThreshold();
+        if (remainingShards <= threshold) {
+            LogUtils_logHHAuto(`[SW-DEBUG] Not equipping sandalwood for mythic, only ${remainingShards} shards remaining (threshold: ${threshold})`);
         }
-        return activated && correctTrollTargetted && remainingShards > 10;
+        return activated && correctTrollTargetted && remainingShards > threshold;
     }
     static needSandalWoodLoveRaid(nextTrollChoosen, loveRaid = null) {
         if (!loveRaid)
@@ -1688,10 +1693,11 @@ class Booster {
         const activated = LoveRaidManager.isAnyActivated() && getStoredValue(HHStoredVarPrefixKey + SK.plusEventLoveRaidSandalWood) === "true";
         const correctTrollTargetted = loveRaid.girl_to_win && loveRaid.trollId == nextTrollChoosen;
         const remainingShards = Number(100 - Number(loveRaid.girl_shards));
-        if (remainingShards <= 10) {
-            LogUtils_logHHAuto(`[SW-DEBUG] Not equipping sandalwood for love raid, only ${remainingShards} shards remaining`);
+        const threshold = Booster.getSandalwoodMinShardsThreshold();
+        if (remainingShards <= threshold) {
+            LogUtils_logHHAuto(`[SW-DEBUG] Not equipping sandalwood for love raid, only ${remainingShards} shards remaining (threshold: ${threshold})`);
         }
-        return activated && correctTrollTargetted && remainingShards > 10;
+        return activated && correctTrollTargetted && remainingShards > threshold;
     }
     static equipeSandalWoodIfNeeded(nextTrollChoosen, settingKey = SK.plusEventMythicSandalWood) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1787,51 +1793,6 @@ class Booster {
         if (!sandalwood)
             return null;
         return sandalwood.usages_remaining;
-    }
-    /**
-     * Determines the maximum recommended batch size (1, 10, or 50) based on
-     * remaining shards, Sandalwood doses, and user settings.
-     *
-     * The most restrictive constraint wins.
-     */
-    static getRecommendedBatchSize(minRemainingShards, dosesRemaining, userSettings) {
-        LogUtils_logHHAuto(`[SW-DEBUG] getRecommendedBatchSize: minRemainingShards=${minRemainingShards}, dosesRemaining=${dosesRemaining}, settings=${JSON.stringify(userSettings)}`);
-        let maxBatch = 50;
-        // User preference caps
-        if (!userSettings.useX50) {
-            maxBatch = 10;
-            LogUtils_logHHAuto('[SW-DEBUG] batch cap: useX50=false → max 10');
-        }
-        if (!userSettings.useX10) {
-            maxBatch = 1;
-            LogUtils_logHHAuto('[SW-DEBUG] batch cap: useX10=false → max 1');
-        }
-        // If Sandalwood is not equipped, no dose-based restrictions apply
-        if (dosesRemaining === null) {
-            LogUtils_logHHAuto(`[SW-DEBUG] getRecommendedBatchSize: no Sandalwood equipped → returning ${maxBatch}`);
-            return maxBatch;
-        }
-        // Dose-based limits (check most restrictive first)
-        if (dosesRemaining <= userSettings.sandalwoodDosesX1Limit) {
-            LogUtils_logHHAuto(`[SW-DEBUG] batch cap: doses ${dosesRemaining} <= dosesX1Limit ${userSettings.sandalwoodDosesX1Limit} → max 1`);
-            maxBatch = 1;
-        }
-        else if (dosesRemaining <= userSettings.sandalwoodDosesX10Limit && maxBatch > 10) {
-            LogUtils_logHHAuto(`[SW-DEBUG] batch cap: doses ${dosesRemaining} <= dosesX10Limit ${userSettings.sandalwoodDosesX10Limit} → max 10`);
-            maxBatch = 10;
-        }
-        // Shard-based limits: collectedShards = 100 - minRemainingShards
-        const collectedShards = 100 - minRemainingShards;
-        if (collectedShards >= userSettings.sandalwoodShardsX1Limit) {
-            LogUtils_logHHAuto(`[SW-DEBUG] batch cap: collectedShards ${collectedShards} >= shardsX1Limit ${userSettings.sandalwoodShardsX1Limit} → max 1`);
-            maxBatch = 1;
-        }
-        else if (collectedShards >= userSettings.sandalwoodShardsX10Limit && maxBatch > 10) {
-            LogUtils_logHHAuto(`[SW-DEBUG] batch cap: collectedShards ${collectedShards} >= shardsX10Limit ${userSettings.sandalwoodShardsX10Limit} → max 10`);
-            maxBatch = 10;
-        }
-        LogUtils_logHHAuto(`[SW-DEBUG] getRecommendedBatchSize: final recommendation → ${maxBatch}`);
-        return maxBatch;
     }
 }
 /** Sandalwood identifier constant — id_item is resolved from market data or env config at runtime. */
@@ -6536,6 +6497,8 @@ class Harem {
         deleteStoredValue(HHStoredVarPrefixKey + TK.haremTeam);
         deleteStoredValue(HHStoredVarPrefixKey + TK.haremTeamScrolls);
         deleteStoredValue(HHStoredVarPrefixKey + TK.haremTeamSettings);
+        setStoredValue(HHStoredVarPrefixKey + TK.autoLoop, "true");
+        LogUtils_logHHAuto("clearHaremToolVariables: re-enabling autoLoop.");
         const lastActionPerformed = getStoredValue(HHStoredVarPrefixKey + TK.lastActionPerformed);
         if (lastActionPerformed == Harem.HAREM_UPGRADE_LAST_ACTION) {
             setStoredValue(HHStoredVarPrefixKey + TK.lastActionPerformed, "none");
@@ -6854,7 +6817,7 @@ class Harem {
                             return true;
                         }
                         else {
-                            // Harem.clearHaremToolVariables();
+                            Harem.clearHaremToolVariables();
                         }
                     }
                 }
@@ -7599,18 +7562,6 @@ class Troll {
                             && canBuyFightsResult.canBuy) // eventGirl available and buy comb true
                             || ((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic) && getStoredValue(HHStoredVarPrefixKey + SK.plusEventMythic) === "true")
                             || ((loveRaid === null || loveRaid === void 0 ? void 0 : loveRaid.girl_to_win) && getStoredValue(HHStoredVarPrefixKey + SK.autoTrollLoveRaidByPassThreshold) === "true"));
-                        // Sandalwood batch-sizing: compute recommended batch based on doses + shards
-                        const dosesRemaining = Booster.getSandalwoodDosesRemaining();
-                        LogUtils_logHHAuto(`[SW-DEBUG] CrushThemFights: eventShards=${remainingEventShards}, raidShards=${remainingLoveRaidShards}, totalRemaining=${remainingShards}, dosesRemaining=${dosesRemaining}, isMythic=${eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic}, power=${currentPower}`);
-                        const recommendedBatch = Booster.getRecommendedBatchSize(Math.min(remainingEventShards || 100, remainingLoveRaidShards || 100), dosesRemaining, {
-                            useX50: getStoredValue(HHStoredVarPrefixKey + SK.useX50Fights) === "true",
-                            useX10: getStoredValue(HHStoredVarPrefixKey + SK.useX10Fights) === "true",
-                            sandalwoodShardsX10Limit: Number(getStoredValue(HHStoredVarPrefixKey + SK.sandalwoodShardsX10Limit)) || 80,
-                            sandalwoodShardsX1Limit: Number(getStoredValue(HHStoredVarPrefixKey + SK.sandalwoodShardsX1Limit)) || 95,
-                            sandalwoodDosesX10Limit: Number(getStoredValue(HHStoredVarPrefixKey + SK.sandalwoodDosesX10Limit)) || 6,
-                            sandalwoodDosesX1Limit: Number(getStoredValue(HHStoredVarPrefixKey + SK.sandalwoodDosesX1Limit)) || 3,
-                        });
-                        LogUtils_logHHAuto(`[SW-DEBUG] CrushThemFights: recommendedBatch=${recommendedBatch}`);
                         const minShardsx50 = getStoredValue(HHStoredVarPrefixKey + SK.minShardsX50);
                         if (getStoredValue(HHStoredVarPrefixKey + SK.useX50Fights) === "true"
                             && minShardsx50 && Number.isInteger(Number(minShardsx50)) && remainingShards >= Number(minShardsx50)
@@ -7618,8 +7569,7 @@ class Troll {
                             && currentPower >= 50
                             && (currentPower >= (Number(getStoredValue(HHStoredVarPrefixKey + SK.autoTrollThreshold)) + 50)
                                 || bypassThreshold)
-                            && ((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic) || getStoredValue(HHStoredVarPrefixKey + SK.useX50FightsAllowNormalEvent) === "true")
-                            && recommendedBatch >= 50) {
+                            && ((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic) || getStoredValue(HHStoredVarPrefixKey + SK.useX50FightsAllowNormalEvent) === "true")) {
                             LogUtils_logHHAuto("Going to crush 50 times: " + trollz[Number(TTF)] + ' for ' + battleButtonX50Price + ' kobans.');
                             setHHVars('Hero.infos.hc_confirm', true);
                             // We have the power.
@@ -7641,8 +7591,7 @@ class Troll {
                         }
                         else {
                             if (getStoredValue(HHStoredVarPrefixKey + SK.useX50Fights) === "true") {
-                                const x50BlockedBy = recommendedBatch < 50 ? ` (SW batch cap: ${recommendedBatch})` : '';
-                                LogUtils_logHHAuto(`Unable to use x50 for ${battleButtonX50Price} kobans,fights : ${Troll.getEnergy()}/50, remaining shards : ${remainingShards}/${getStoredValue(HHStoredVarPrefixKey + SK.minShardsX50)}, kobans : ${HeroHelper.getKoban()}/${Number(getStoredValue(HHStoredVarPrefixKey + SK.kobanBank))}${x50BlockedBy}`);
+                                LogUtils_logHHAuto(`Unable to use x50 for ${battleButtonX50Price} kobans,fights : ${Troll.getEnergy()}/50, remaining shards : ${remainingShards}/${getStoredValue(HHStoredVarPrefixKey + SK.minShardsX50)}, kobans : ${HeroHelper.getKoban()}/${Number(getStoredValue(HHStoredVarPrefixKey + SK.kobanBank))}`);
                             }
                         }
                         const minShardsX10 = getStoredValue(HHStoredVarPrefixKey + SK.minShardsX10);
@@ -7652,8 +7601,7 @@ class Troll {
                             && currentPower >= 10
                             && (currentPower >= (Number(getStoredValue(HHStoredVarPrefixKey + SK.autoTrollThreshold)) + 10)
                                 || bypassThreshold)
-                            && ((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic) || getStoredValue(HHStoredVarPrefixKey + SK.useX10FightsAllowNormalEvent) === "true")
-                            && recommendedBatch >= 10) {
+                            && ((eventTrollGirl === null || eventTrollGirl === void 0 ? void 0 : eventTrollGirl.is_mythic) || getStoredValue(HHStoredVarPrefixKey + SK.useX10FightsAllowNormalEvent) === "true")) {
                             LogUtils_logHHAuto(`Going to crush 10 times: ${trollz[Number(TTF)]} for ${battleButtonX10Price} kobans.`);
                             setHHVars('Hero.infos.hc_confirm', true);
                             // We have the power.
@@ -7675,8 +7623,7 @@ class Troll {
                         }
                         else {
                             if (getStoredValue(HHStoredVarPrefixKey + SK.useX10Fights) === "true") {
-                                const x10BlockedBy = recommendedBatch < 10 ? ` (SW batch cap: ${recommendedBatch})` : '';
-                                LogUtils_logHHAuto(`Unable to use x10 for ${battleButtonX10Price} kobans,fights : ${Troll.getEnergy()}/10, remaining shards : ${remainingShards}/${getStoredValue(HHStoredVarPrefixKey + SK.minShardsX10)}, kobans : ${HeroHelper.getKoban()}/${Number(getStoredValue(HHStoredVarPrefixKey + SK.kobanBank))}${x10BlockedBy}`);
+                                LogUtils_logHHAuto(`Unable to use x10 for ${battleButtonX10Price} kobans,fights : ${Troll.getEnergy()}/10, remaining shards : ${remainingShards}/${getStoredValue(HHStoredVarPrefixKey + SK.minShardsX10)}, kobans : ${HeroHelper.getKoban()}/${Number(getStoredValue(HHStoredVarPrefixKey + SK.kobanBank))}`);
                             }
                         }
                     }
@@ -8227,10 +8174,7 @@ const SK = {
     useX50FightsAllowNormalEvent: "Setting_useX50FightsAllowNormalEvent",
     minShardsX10: "Setting_minShardsX10",
     minShardsX50: "Setting_minShardsX50",
-    sandalwoodShardsX10Limit: "Setting_sandalwoodShardsX10Limit",
-    sandalwoodShardsX1Limit: "Setting_sandalwoodShardsX1Limit",
-    sandalwoodDosesX10Limit: "Setting_sandalwoodDosesX10Limit",
-    sandalwoodDosesX1Limit: "Setting_sandalwoodDosesX1Limit",
+    sandalwoodMinShardsThreshold: "Setting_sandalwoodMinShardsThreshold",
     kobanBank: "Setting_kobanBank",
     buyCombat: "Setting_buyCombat",
     buyCombTimer: "Setting_buyCombTimer",
@@ -9733,42 +9677,9 @@ HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.minShardsX50] =
         menuType: "value",
         kobanUsing: false
     };
-HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.sandalwoodShardsX10Limit] =
+HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.sandalwoodMinShardsThreshold] =
     {
-        default: "80",
-        storage: "Storage()",
-        HHType: "Setting",
-        valueType: "Small Integer",
-        getMenu: true,
-        setMenu: true,
-        menuType: "value",
-        kobanUsing: false
-    };
-HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.sandalwoodShardsX1Limit] =
-    {
-        default: "95",
-        storage: "Storage()",
-        HHType: "Setting",
-        valueType: "Small Integer",
-        getMenu: true,
-        setMenu: true,
-        menuType: "value",
-        kobanUsing: false
-    };
-HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.sandalwoodDosesX10Limit] =
-    {
-        default: "6",
-        storage: "Storage()",
-        HHType: "Setting",
-        valueType: "Small Integer",
-        getMenu: true,
-        setMenu: true,
-        menuType: "value",
-        kobanUsing: false
-    };
-HHStoredVars_HHStoredVars[HHStoredVarPrefixKey + SK.sandalwoodDosesX1Limit] =
-    {
-        default: "3",
+        default: "0",
         storage: "Storage()",
         HHType: "Setting",
         valueType: "Small Integer",
@@ -11817,6 +11728,7 @@ class HaremGirl {
                         HaremGirl.HaremDisplayGirlPopup(HaremGirl.EQUIPMENT_TYPE, getTextForUI("giveMaxingOut", "elementText") + ' ' + girl.name + ' : ' + girlListProgress, (remainingGirls + 1) * 5, haremGirlSpent);
                         $('#girl-equip').trigger('click');
                         yield TimeHelper.sleep(randomInterval(400, 700));
+                        yield HaremGirl.optimizeEquipmentSlots(girl);
                     }
                     if (upgradeSkill) {
                         HaremGirl.switchTabs(HaremGirl.SKILLS_TYPE);
@@ -11924,6 +11836,116 @@ class HaremGirl {
         catch (error) {
             LogUtils_logHHAuto("Can't remove popup_message_harem");
         }
+    }
+    static optimizeEquipmentSlots(girl) {
+        return HaremGirl_awaiter(this, void 0, void 0, function* () {
+            const equipmentSlots = $('.equipment_slot');
+            const slotCount = equipmentSlots.length;
+            LogUtils_logHHAuto(`Optimize equipment: checking ${slotCount} slots for ${girl.name}`);
+            const scoreItem = (item) => {
+                const c = item.caracs;
+                const caracSum = (c.carac1 || 0) + (c.carac2 || 0) + (c.carac3 || 0) + (c.damage || 0) + (c.defense || 0) + (c.ego || 0);
+                let resonanceMatches = 0;
+                if (item.resonance_bonuses && !Array.isArray(item.resonance_bonuses)) {
+                    const rb = item.resonance_bonuses;
+                    if (rb.class && String(rb.class.identifier) === String(girl.class))
+                        resonanceMatches++;
+                    if (rb.element && String(rb.element.identifier) === String(girl.element))
+                        resonanceMatches++;
+                    if (rb.figure && String(rb.figure.identifier) === String(girl.figure))
+                        resonanceMatches++;
+                }
+                return { caracSum, resonanceMatches };
+            };
+            for (let i = 0; i < slotCount; i++) {
+                const slot = equipmentSlots.eq(i);
+                slot.trigger('click');
+                yield TimeHelper.sleep(randomInterval(300, 500));
+                const equippedEl = slot.find('.slot[data-d]');
+                let equippedData = null;
+                if (equippedEl.length > 0 && equippedEl.attr('data-d')) {
+                    equippedData = JSON.parse(equippedEl.attr('data-d'));
+                }
+                const inventoryItems = [];
+                $('.right-section .slot.slot_girl_armor[data-d]').each(function () {
+                    const raw = $(this).attr('data-d');
+                    if (!raw)
+                        return;
+                    const data = JSON.parse(raw);
+                    if (data.caracs && data.type === 'girl_armor') {
+                        inventoryItems.push({ data });
+                    }
+                });
+                if (inventoryItems.length === 0) {
+                    LogUtils_logHHAuto(`Slot ${i}: no inventory items available, skipping`);
+                    continue;
+                }
+                inventoryItems.sort((a, b) => {
+                    const sa = scoreItem(a.data);
+                    const sb = scoreItem(b.data);
+                    if (sb.caracSum !== sa.caracSum)
+                        return sb.caracSum - sa.caracSum;
+                    if (sb.resonanceMatches !== sa.resonanceMatches)
+                        return sb.resonanceMatches - sa.resonanceMatches;
+                    const ca = a.data.caracs;
+                    const cb = b.data.caracs;
+                    return ((cb.carac1 || 0) + (cb.carac2 || 0) + (cb.carac3 || 0)) - ((ca.carac1 || 0) + (ca.carac2 || 0) + (ca.carac3 || 0));
+                });
+                const best = inventoryItems[0];
+                if (!best)
+                    continue;
+                const bestScore = scoreItem(best.data);
+                let shouldReplace = false;
+                if (!equippedData || !equippedData.caracs) {
+                    shouldReplace = true;
+                }
+                else {
+                    const equippedScore = scoreItem(equippedData);
+                    if (bestScore.caracSum > equippedScore.caracSum) {
+                        shouldReplace = true;
+                    }
+                    else if (bestScore.caracSum === equippedScore.caracSum && bestScore.resonanceMatches > equippedScore.resonanceMatches) {
+                        shouldReplace = true;
+                    }
+                }
+                if (shouldReplace) {
+                    const armorId = best.data.id_girl_armor;
+                    LogUtils_logHHAuto(`Slot ${i}: replacing with better item (L${best.data.level} ${best.data.rarity}, score=${bestScore.caracSum}, resonance=${bestScore.resonanceMatches}, id=${armorId})`);
+                    yield new Promise((resolve) => {
+                        $.ajax({
+                            url: '/ajax.php',
+                            type: 'POST',
+                            data: {
+                                action: 'girl_equipment_equip',
+                                id_girl: girl.id_girl,
+                                id_girl_armor: armorId,
+                                sort_by: 'rarity',
+                                sorting_order: 'asc'
+                            },
+                            dataType: 'json',
+                            success: function (data) {
+                                if (data && data.success) {
+                                    LogUtils_logHHAuto(`Slot ${i}: equipped successfully`);
+                                }
+                                else {
+                                    LogUtils_logHHAuto(`Slot ${i}: equip response: ${JSON.stringify(data)}`);
+                                }
+                                resolve();
+                            },
+                            error: function (xhr, status, error) {
+                                LogUtils_logHHAuto(`Slot ${i}: equip HTTP error: ${status} ${error} (${xhr.status})`);
+                                resolve();
+                            }
+                        });
+                    });
+                    yield TimeHelper.sleep(randomInterval(300, 500));
+                }
+                else {
+                    LogUtils_logHHAuto(`Slot ${i}: current item is optimal`);
+                }
+            }
+            LogUtils_logHHAuto('Equipment optimization complete');
+        });
     }
 }
 HaremGirl.AFFECTION_TYPE = 'affection';
@@ -16741,7 +16763,13 @@ class TeamScoringService {
      * Filter girls: only Mythic and Legendary (both modes).
      */
     static filterHighRarity(girls) {
-        return girls.filter(g => HIGH_RARITIES.has(g.rarity));
+        return girls.filter(g => {
+            if (g.rarity === 'mythic')
+                return true;
+            if (g.rarity === 'legendary')
+                return g.nb_grades >= 5;
+            return false;
+        });
     }
     /**
      * Get the Tier-5 skill info for a given element.
@@ -16892,6 +16920,44 @@ class TeamScoringService {
             : 0;
         return statScore + synergyWeight * normalizedSynergyBonus;
     }
+    // ─── Tier 3 Delta Estimation ────────────────────────────────────
+    /**
+     * Estimate the stat-equivalent value of adding a candidate to the team,
+     * considering the marginal Tier 3 bonus she would provide.
+     *
+     * Returns 0 if the candidate does not match the target trait.
+     * Otherwise returns marginalPct × teamStatTotal, where marginalPct
+     * accounts for both the new girl's bonus and the boost to existing
+     * trait teammates.
+     */
+    static estimateTier3Delta(candidate, currentTeam, traitCategory, traitValue, teamStatTotal) {
+        const candidateCategory = ELEMENT_TO_TRAIT_CATEGORY[candidate.element];
+        if (candidateCategory !== traitCategory)
+            return 0;
+        const candidateValue = TeamScoringService.getTraitValue(candidate);
+        if (candidateValue !== traitValue)
+            return 0;
+        // Count existing trait-matching teammates and sum their bonus rates
+        let existingTraitCount = 0;
+        let existingBoostSum = 0;
+        for (const member of currentTeam) {
+            const memberCategory = ELEMENT_TO_TRAIT_CATEGORY[member.element];
+            if (memberCategory !== traitCategory)
+                continue;
+            const memberValue = TeamScoringService.getTraitValue(member);
+            if (memberValue !== traitValue)
+                continue;
+            existingTraitCount++;
+            existingBoostSum += member.rarity === 'mythic' ? TIER3_BONUS_MYTHIC : TIER3_BONUS_LEGENDARY;
+        }
+        // New girl sees existingTraitCount matches
+        const candidateBonusRate = candidate.rarity === 'mythic' ? TIER3_BONUS_MYTHIC : TIER3_BONUS_LEGENDARY;
+        const newGirlBonus = existingTraitCount * candidateBonusRate;
+        // Each existing trait teammate gains +1 match from this girl
+        const existingBoost = existingBoostSum;
+        const marginalPct = newGirlBonus + existingBoost;
+        return marginalPct * teamStatTotal;
+    }
     // ─── Leader Selection ────────────────────────────────────────────
     /**
      * Rank leader candidates by element priority (Shield > Stun > Execute > Reflect).
@@ -17010,42 +17076,31 @@ class TeamBuilderService {
         // Phase 4: Select Leader
         const rankedLeaders = TeamScoringService.rankLeaderCandidates(pool, scoreMap, traitCategory, traitValue);
         const leader = rankedLeaders[0];
-        // Phase 5: Fill slots 2-7
+        // Phase 5: Fill slots 2-7 (unified: trait group + stats + synergy + tier 3)
         const team = [leader];
         const teamElements = [leader.element];
         const used = new Set([leader.id_girl]);
-        // First: add girls from the best trait group (sorted by stats)
-        const traitGroupSorted = [...traitGroupGirls].sort((a, b) => (scoreMap.get(b.id_girl) || 0) - (scoreMap.get(a.id_girl) || 0));
-        for (const girl of traitGroupSorted) {
-            if (team.length >= TEAM_SIZE)
-                break;
-            if (used.has(girl.id_girl))
-                continue;
-            team.push(girl);
-            teamElements.push(girl.element);
-            used.add(girl.id_girl);
-        }
-        // Then: fill remaining slots from pool by stats (with synergy as tiebreaker)
-        if (team.length < TEAM_SIZE) {
-            for (let slot = team.length; slot < TEAM_SIZE; slot++) {
-                let bestGirl = null;
-                let bestCombinedScore = -Infinity;
-                for (const candidate of pool) {
-                    if (used.has(candidate.id_girl))
-                        continue;
-                    const statScore = scoreMap.get(candidate.id_girl) || 0;
-                    const combinedScore = TeamScoringService.scoreWithSynergy(candidate, teamElements, statScore, maxStat, 0.05);
-                    if (combinedScore > bestCombinedScore) {
-                        bestCombinedScore = combinedScore;
-                        bestGirl = candidate;
-                    }
+        for (let slot = 1; slot < TEAM_SIZE; slot++) {
+            let bestGirl = null;
+            let bestCombinedScore = -Infinity;
+            const teamStatTotal = team.reduce((sum, g) => sum + (scoreMap.get(g.id_girl) || 0), 0);
+            for (const candidate of pool) {
+                if (used.has(candidate.id_girl))
+                    continue;
+                const statScore = scoreMap.get(candidate.id_girl) || 0;
+                const synergyScore = TeamScoringService.scoreWithSynergy(candidate, teamElements, statScore, maxStat, 0.05);
+                const tier3Delta = TeamScoringService.estimateTier3Delta(candidate, team, traitCategory, traitValue, teamStatTotal);
+                const combinedScore = synergyScore + tier3Delta;
+                if (combinedScore > bestCombinedScore) {
+                    bestCombinedScore = combinedScore;
+                    bestGirl = candidate;
                 }
-                if (!bestGirl)
-                    break;
-                team.push(bestGirl);
-                teamElements.push(bestGirl.element);
-                used.add(bestGirl.id_girl);
             }
+            if (!bestGirl)
+                break;
+            team.push(bestGirl);
+            teamElements.push(bestGirl.element);
+            used.add(bestGirl.id_girl);
         }
         if (team.length < TEAM_SIZE) {
             return null;
@@ -18145,7 +18200,8 @@ class TransPornstarHarem {
             'CEO Ramona',
             'Mama Bee',
             'Officer Jolie',
-            'Ariel in Wonderland'];
+            'Ariel in Wonderland',
+            'Rex & Kate'];
     }
     static getTrollGirlsId() {
         return [
@@ -18159,13 +18215,14 @@ class TransPornstarHarem {
             [['692804877', '984917842', '581358076'], ['397703278', '704166982', '483645616'], ['349968569', '970429531', '954328841']],
             [[0], [0], [0]],
             [[0], [0], [0]],
+            [[0], [0], [0]],
         ];
     }
     static updateFeatures(envVariables) {
         envVariables.isEnabledSpreadsheets = false;
     }
 }
-TransPornstarHarem.trollIdMapping = { 2: 1, 3: 2, 5: 3, 6: 4, 7: 5, 8: 6, 9: 7, 11: 8, 13: 9, 14: 10 };
+TransPornstarHarem.trollIdMapping = { 2: 1, 3: 2, 5: 3, 6: 4, 7: 5, 8: 6, 9: 7, 11: 8, 13: 9, 14: 10, 15: 11 };
 TransPornstarHarem.lastQuestId = -1; //  TODO update when new quest comes
 
 ;// CONCATENATED MODULE: ./src/config/game/index.ts
@@ -19459,12 +19516,7 @@ function getMenu() {
             + hhMenuInput('minShardsX50', HHAuto_inputPattern.minShardsX, 'text-align:center; width:7em')
             + `</div>`
             + hhMenuSwitch('plusGirlSkins')
-            + `</div>`
-            + `<div class="internalOptionsRow">`
-            + hhMenuInput('sandalwoodShardsX10Limit', HHAuto_inputPattern.sandalwoodLimit, 'text-align:center; width:7em')
-            + hhMenuInput('sandalwoodShardsX1Limit', HHAuto_inputPattern.sandalwoodLimit, 'text-align:center; width:7em')
-            + hhMenuInput('sandalwoodDosesX10Limit', HHAuto_inputPattern.sandalwoodLimit, 'text-align:center; width:7em')
-            + hhMenuInput('sandalwoodDosesX1Limit', HHAuto_inputPattern.sandalwoodLimit, 'text-align:center; width:7em')
+            + hhMenuInput('sandalwoodMinShardsThreshold', HHAuto_inputPattern.sandalwoodLimit, 'text-align:center; width:7em')
             + `</div>`
             + `<div class="internalOptionsRow">`
             + hhMenuSwitch('plusEvent')
@@ -23075,6 +23127,9 @@ function handlePageSpecific(ctx) {
                     Booster.collectBoostersFromMarket = callItOnce(Booster.collectBoostersFromMarket);
                     setTimeout(Booster.collectBoostersFromMarket, 200);
                 }
+                if (!Booster.hasBoosterDataFromMarket()) {
+                    setTimeout(() => Shop.updateShop(), 300);
+                }
                 break;
             case ConfigHelper.getHHScriptVars("pagesIDHome"):
                 setTimeout(Season.displayRemainingTime, 500);
@@ -23457,7 +23512,7 @@ const MAX_REMIND_COUNT = 3;
  * Set to a specific version (e.g. "7.34.2") to activate the feature popup
  * for that version. Set to "0" to deactivate (default).
  */
-const FEATURE_POPUP_VERSION = "7.34.2";
+const FEATURE_POPUP_VERSION = "0";
 /**
  * Title shown in the popup header.
  */
@@ -23483,17 +23538,12 @@ const FEATURE_POPUP_TITLE = "What's New in HHAuto";
  */
 const FEATURE_POPUP_CONTENT = `
   <div style="padding:10px; max-width:500px; color:#333;">
-    <h3 style="margin-top:0;">v7.34.0 — Smarter Team Selection</h3>
-    <p>The <b>"Current Best"</b> and <b>"Possible Best"</b> buttons now use an improved algorithm that considers <b>element synergies</b> and <b>leader skills</b> when building your team.</p>
-    <ul style="padding-left:18px;">
-      <li><b>Leader optimization:</b> The girl in position 1 is chosen for the best Tier-5 skill (Execute > Stun > Shield > Reflect), not just highest stats. This means the leader may have fewer points than other team members — that is intentional.</li>
-      <li><b>Element synergies:</b> The algorithm considers how element bonuses (crit damage, crit chance, heal, etc.) stack across all 7 team members.</li>
-      <li><b>Visual info:</b> Element icons and a synergy info panel now show why the algorithm chose each girl.</li>
-    </ul>
-    <p style="font-size:11px; color:#666;">
-      For full details, see the
-      <a href="https://github.com/Roukys/HHauto#v7340--smarter-team-selection" target="_blank" style="color:#3366cc;">changelog on GitHub</a>.
-    </p>
+    <h3 style="margin-top:0;">v7.34.16 — New Setting: "SW min shards"</h3>
+    <p>Controls when Sandalwood stops being equipped based on remaining shards.
+    <b>0</b> (default) = no limit, Sandalwood is used until the girl is complete.</p>
+    <p><b>Example:</b> Setting it to <b>1</b> means Sandalwood is equipped until only 1 shard remains.</p>
+    <h3>v7.35.0 — Optimized Equipment Selection</h3>
+    <p>"Give equipment" now checks each slot after auto-equip and replaces items with better alternatives from your inventory. Items are ranked by total stats, with resonance matches as tiebreaker. No new settings required.</p>
   </div>
 `;
 class FeaturePopupService {
@@ -24747,7 +24797,13 @@ function start() {
         });
         currentInput.checkValidity();
     });
-    setStoredValue(HHStoredVarPrefixKey + TK.autoLoop, "true");
+    // Don't re-enable autoLoop if a harem tool flow (Stuff Team, Give XP, etc.)
+    // is in progress — these multi-page flows rely on autoLoop staying disabled
+    // to prevent action handlers from interrupting with page navigations.
+    const activeHaremFlow = getStoredValue(HHStoredVarPrefixKey + TK.haremGirlMode);
+    if (!activeHaremFlow) {
+        setStoredValue(HHStoredVarPrefixKey + TK.autoLoop, "true");
+    }
     if (typeof getStoredValue(HHStoredVarPrefixKey + TK.freshStart) == "undefined" || isNaN(Number(getStoredValue(HHStoredVarPrefixKey + TK.autoLoopTimeMili)))) {
         setDefaults(true);
     }

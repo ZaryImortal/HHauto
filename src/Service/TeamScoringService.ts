@@ -160,7 +160,11 @@ export class TeamScoringService {
      * Filter girls: only Mythic and Legendary (both modes).
      */
     static filterHighRarity(girls: GirlData[]): GirlData[] {
-        return girls.filter(g => HIGH_RARITIES.has(g.rarity));
+        return girls.filter(g => {
+            if (g.rarity === 'mythic') return true;
+            if (g.rarity === 'legendary') return g.nb_grades >= 5;
+            return false;
+        });
     }
 
     /**
@@ -337,6 +341,53 @@ export class TeamScoringService {
             : 0;
 
         return statScore + synergyWeight * normalizedSynergyBonus;
+    }
+
+    // ─── Tier 3 Delta Estimation ────────────────────────────────────
+
+    /**
+     * Estimate the stat-equivalent value of adding a candidate to the team,
+     * considering the marginal Tier 3 bonus she would provide.
+     *
+     * Returns 0 if the candidate does not match the target trait.
+     * Otherwise returns marginalPct × teamStatTotal, where marginalPct
+     * accounts for both the new girl's bonus and the boost to existing
+     * trait teammates.
+     */
+    static estimateTier3Delta(
+        candidate: GirlData,
+        currentTeam: GirlData[],
+        traitCategory: TraitCategory,
+        traitValue: string,
+        teamStatTotal: number
+    ): number {
+        const candidateCategory = ELEMENT_TO_TRAIT_CATEGORY[candidate.element];
+        if (candidateCategory !== traitCategory) return 0;
+
+        const candidateValue = TeamScoringService.getTraitValue(candidate);
+        if (candidateValue !== traitValue) return 0;
+
+        // Count existing trait-matching teammates and sum their bonus rates
+        let existingTraitCount = 0;
+        let existingBoostSum = 0;
+        for (const member of currentTeam) {
+            const memberCategory = ELEMENT_TO_TRAIT_CATEGORY[member.element];
+            if (memberCategory !== traitCategory) continue;
+            const memberValue = TeamScoringService.getTraitValue(member);
+            if (memberValue !== traitValue) continue;
+            existingTraitCount++;
+            existingBoostSum += member.rarity === 'mythic' ? TIER3_BONUS_MYTHIC : TIER3_BONUS_LEGENDARY;
+        }
+
+        // New girl sees existingTraitCount matches
+        const candidateBonusRate = candidate.rarity === 'mythic' ? TIER3_BONUS_MYTHIC : TIER3_BONUS_LEGENDARY;
+        const newGirlBonus = existingTraitCount * candidateBonusRate;
+
+        // Each existing trait teammate gains +1 match from this girl
+        const existingBoost = existingBoostSum;
+
+        const marginalPct = newGirlBonus + existingBoost;
+        return marginalPct * teamStatTotal;
     }
 
     // ─── Leader Selection ────────────────────────────────────────────

@@ -79,10 +79,10 @@ describe('TeamScoringService', () => {
     });
 
     describe('filterHighRarity', () => {
-        it('should keep only mythic and legendary girls', () => {
+        it('should keep mythic and 5-star legendary girls', () => {
             const girls = [
-                makeGirl({ id_girl: 1, rarity: 'mythic' }),
-                makeGirl({ id_girl: 2, rarity: 'legendary' }),
+                makeGirl({ id_girl: 1, rarity: 'mythic', nb_grades: 6 }),
+                makeGirl({ id_girl: 2, rarity: 'legendary', nb_grades: 5 }),
                 makeGirl({ id_girl: 3, rarity: 'epic' }),
                 makeGirl({ id_girl: 4, rarity: 'rare' }),
                 makeGirl({ id_girl: 5, rarity: 'common' }),
@@ -90,6 +90,17 @@ describe('TeamScoringService', () => {
             const filtered = TeamScoringService.filterHighRarity(girls);
             expect(filtered).toHaveLength(2);
             expect(filtered.map(g => g.id_girl)).toEqual([1, 2]);
+        });
+
+        it('should exclude 3-star legendary girls', () => {
+            const girls = [
+                makeGirl({ id_girl: 1, rarity: 'legendary', nb_grades: 3 }),
+                makeGirl({ id_girl: 2, rarity: 'legendary', nb_grades: 5 }),
+                makeGirl({ id_girl: 3, rarity: 'mythic', nb_grades: 6 }),
+            ];
+            const filtered = TeamScoringService.filterHighRarity(girls);
+            expect(filtered).toHaveLength(2);
+            expect(filtered.map(g => g.id_girl)).toEqual([2, 3]);
         });
 
         it('should return empty array when no high-rarity girls exist', () => {
@@ -302,6 +313,74 @@ describe('TeamScoringService', () => {
             const blueGroup = groups.find(g => g.traitValue === 'blue');
             expect(blueGroup).toBeDefined();
             expect(blueGroup!.girls).toHaveLength(1);
+        });
+    });
+
+    // ─── Tier 3 Delta Estimation Tests ─────────────────────────────
+
+    describe('estimateTier3Delta', () => {
+        it('should return 0 when candidate does not match trait category', () => {
+            const candidate = makeGirl({ element: 'light', hairColor: 'blonde' }); // hairColor category
+            const team = [makeGirl({ id_girl: 2, element: 'fire', eyeColor: 'blue' })];
+            const delta = TeamScoringService.estimateTier3Delta(
+                candidate, team, 'eyeColor', 'blue', 10000
+            );
+            expect(delta).toBe(0);
+        });
+
+        it('should return 0 when candidate has wrong trait value', () => {
+            const candidate = makeGirl({ element: 'fire', eyeColor: 'green' });
+            const team = [makeGirl({ id_girl: 2, element: 'fire', eyeColor: 'blue' })];
+            const delta = TeamScoringService.estimateTier3Delta(
+                candidate, team, 'eyeColor', 'blue', 10000
+            );
+            expect(delta).toBe(0);
+        });
+
+        it('should return 0 when no existing trait teammates', () => {
+            const candidate = makeGirl({ element: 'fire', eyeColor: 'blue', rarity: 'mythic' });
+            const team = [makeGirl({ id_girl: 2, element: 'light', hairColor: 'blonde' })];
+            const delta = TeamScoringService.estimateTier3Delta(
+                candidate, team, 'eyeColor', 'blue', 10000
+            );
+            expect(delta).toBe(0);
+        });
+
+        it('should calculate correct delta with one existing mythic trait teammate', () => {
+            const candidate = makeGirl({ id_girl: 1, element: 'fire', eyeColor: 'blue', rarity: 'mythic' });
+            const team = [makeGirl({ id_girl: 2, element: 'darkness', eyeColor: 'blue', rarity: 'mythic' })];
+            // newGirlBonus = 1 * 0.01 = 0.01
+            // existingBoost = 0.01 (one mythic teammate)
+            // marginalPct = 0.02
+            // delta = 0.02 * 10000 = 200
+            const delta = TeamScoringService.estimateTier3Delta(
+                candidate, team, 'eyeColor', 'blue', 10000
+            );
+            expect(delta).toBeCloseTo(200, 2);
+        });
+
+        it('should handle mixed mythic/legendary existing teammates', () => {
+            const candidate = makeGirl({ id_girl: 1, element: 'fire', eyeColor: 'blue', rarity: 'mythic' });
+            const team = [
+                makeGirl({ id_girl: 2, element: 'darkness', eyeColor: 'blue', rarity: 'mythic' }),
+                makeGirl({ id_girl: 3, element: 'fire', eyeColor: 'blue', rarity: 'legendary' }),
+            ];
+            // newGirlBonus = 2 * 0.01 = 0.02
+            // existingBoost = 0.01 + 0.008 = 0.018
+            // marginalPct = 0.038
+            // delta = 0.038 * 60000 = 2280
+            const delta = TeamScoringService.estimateTier3Delta(
+                candidate, team, 'eyeColor', 'blue', 60000
+            );
+            expect(delta).toBeCloseTo(2280, 2);
+        });
+
+        it('should scale with teamStatTotal', () => {
+            const candidate = makeGirl({ id_girl: 1, element: 'fire', eyeColor: 'blue', rarity: 'mythic' });
+            const team = [makeGirl({ id_girl: 2, element: 'darkness', eyeColor: 'blue', rarity: 'mythic' })];
+            const delta1 = TeamScoringService.estimateTier3Delta(candidate, team, 'eyeColor', 'blue', 10000);
+            const delta2 = TeamScoringService.estimateTier3Delta(candidate, team, 'eyeColor', 'blue', 50000);
+            expect(delta2).toBe(delta1 * 5);
         });
     });
 
