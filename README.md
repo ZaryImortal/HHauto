@@ -16,6 +16,28 @@ c) TamperMonkey should automatically prompt you to install/update the script. If
 
 ## Latest Updates
 
+### v7.35.4 — Troll menu: Event section separator and restored buy-combat controls
+
+Addresses [#1565](https://github.com/Roukys/HHauto/issues/1565). The Event section of the Troll Battle menu is now visually separated like Mythic and Raid, and the Buy Combat controls for Event are visible again.
+
+**What changed:**
+- Separator line added above the +Event row, matching Mythic and Raid styling
+- "Buy comb. for events" switch and timer input are visible next to +Event again
+- The generic "Enable" switch has been renamed to "Standard Troll on/off" to clarify it only controls the standard troll
+
+---
+
+### v7.35.3 — Full-inventory scan for equipment optimization
+
+Follow-up to v7.35.0. The previous version only considered the first ~100 items visible in the inventory panel, which meant better items further down the list were ignored. v7.35.3 now forces the inventory to load all items before scoring, so the optimal item for each slot is found even with very large inventories.
+
+**What changed:**
+- The script now scrolls the inventory panel to load every item before evaluating options
+- After selecting the best item, the explicit Equip button is clicked to confirm the change
+- No new settings — runs automatically as part of "Give equipment"
+
+---
+
 ### v7.35.2 — Fix auto-equip boosters loop
 
 Fixed a bug where auto-equip boosters could enter an infinite loop navigating to the shop page repeatedly without caching booster inventory data.
