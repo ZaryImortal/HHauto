@@ -176,8 +176,7 @@ export class Troll {
         const eventGirl = EventModule.getEventGirl();
         const eventMythicGirl = EventModule.getEventMythicGirl();
         const allTrollRaids:LoveRaid[] = LoveRaidManager.isAnyActivated() ? LoveRaidManager.getTrollRaids() : [];
-        const minRaidStars = LoveRaidManager.getMinRaidStars();
-        const raidStarsRaids:LoveRaid[] = minRaidStars > 0 ? allTrollRaids.filter(raid => raid.girlGrade >= minRaidStars) : [];
+        const raidStarsRaids:LoveRaid[] = LoveRaidManager.filterByRaidStars(allTrollRaids);
         // +Raid: user-selected girl bypasses grade filter, auto-mode ("first") respects it
         const loveRaids:LoveRaid[] = LoveRaidManager.isActivated() ? allTrollRaids : [];
         if (debugEnabled && logging) {
@@ -191,8 +190,8 @@ export class Troll {
             TTF = Troll.getTrollIdFromEvent(eventMythicGirl);
         }
         else if (raidStarsRaids.length > 0){
-            if (logging) logHHAuto("Raid Stars troll fight (min grade " + minRaidStars + ")");
-            const loveRaid = LoveRaidManager.getRaidToFight(raidStarsRaids, logging);
+            if (logging) logHHAuto("Raid Stars troll fight (selection " + LoveRaidManager.getRaidStarsSelection() + ")");
+            const loveRaid = LoveRaidManager.getRaidStarsRaidToFight(raidStarsRaids, logging);
             if (loveRaid) {
                 TTF = loveRaid.trollId;
             }
@@ -305,11 +304,16 @@ export class Troll {
         {
             const eventGirl = EventModule.getEventGirl();
             const eventMythicGirl = EventModule.getEventMythicGirl();
-            const loveRaid = LoveRaidManager.isAnyActivated() ? LoveRaidManager.getRaidToFight(LoveRaidManager.getTrollRaids(), false) : undefined;
+            const allTrollRaids = LoveRaidManager.isAnyActivated() ? LoveRaidManager.getTrollRaids() : [];
+            const raidStarsFiltered = LoveRaidManager.filterByRaidStars(allTrollRaids);
+            const raidStarsRaid: LoveRaid = LoveRaidManager.getRaidStarsRaidToFight(raidStarsFiltered);
+            const loveRaid: LoveRaid = LoveRaidManager.isActivated()
+                ? LoveRaidManager.getRaidToFight(allTrollRaids, false)
+                : undefined;
             //logHHAuto("No power for battle.");
             if (
                 !Troll.canBuyFight(eventGirl).canBuy && !Troll.canBuyFight(eventMythicGirl).canBuy &&
-                !Troll.canBuyFightForRaid(loveRaid).canBuy)
+                !Troll.canBuyFightForRaid(loveRaid).canBuy && !Troll.canBuyFightForRaid(raidStarsRaid).canBuy)
             {
                 return false;
             }
@@ -721,15 +725,14 @@ export class Troll {
         const pricePerFight = hero.energies[type].seconds_per_point * (unsafeWindow.hh_prices[type + '_cost_per_minute'] / 60);
         let remainingShards:number;
 
-        if (Number.isInteger(eventGirl?.shards))
+        // #1565: only buy when energy is empty (0) and girl not yet won (shards < 100)
+        if (Number.isInteger(eventGirl?.shards) && currentFight === 0 && eventGirl.shards < 100)
         {
             if (
                 (
                     getStoredValue(HHStoredVarPrefixKey+SK.buyCombat) =="true"
                     && getStoredValue(HHStoredVarPrefixKey+SK.plusEvent) ==="true"
                     && getSecondsLeft("eventGoing") !== 0
-                    && !Number.isNaN(Number(getStoredValue(HHStoredVarPrefixKey + SK.buyCombTimer)))
-                    && getSecondsLeft("eventGoing") < getStoredValue(HHStoredVarPrefixKey+SK.buyCombTimer)*3600
                     && eventGirl.girl_id && !eventGirl.is_mythic
                 )
                 ||
@@ -737,8 +740,6 @@ export class Troll {
                     getStoredValue(HHStoredVarPrefixKey+SK.plusEventMythic) ==="true"
                     && getStoredValue(HHStoredVarPrefixKey+SK.buyMythicCombat) === "true"
                     && getSecondsLeft("eventMythicGoing") !== 0
-                    && !Number.isNaN(Number(getStoredValue(HHStoredVarPrefixKey + SK.buyMythicCombTimer)))
-                    && getSecondsLeft("eventMythicGoing") < getStoredValue(HHStoredVarPrefixKey+SK.buyMythicCombTimer)*3600
                     && eventGirl.is_mythic
                 )
             )
@@ -807,7 +808,8 @@ export class Troll {
         const pricePerFight = hero.energies[type].seconds_per_point * (unsafeWindow.hh_prices[type + '_cost_per_minute'] / 60);
         let remainingShards:number;
 
-        if (Number.isInteger(raid?.girl_shards))
+        // #1565: only buy when energy is empty (0) and girl not yet won (shards < 100)
+        if (Number.isInteger(raid?.girl_shards) && currentFight === 0 && raid.girl_shards < 100)
         {
             if (
                     getStoredValue(HHStoredVarPrefixKey +SK.buyLoveRaidCombat) =="true"

@@ -1312,16 +1312,16 @@ HHStoredVars[HHStoredVarPrefixKey + SK.autoTrollLoveRaidByPassThreshold] =
 };
 HHStoredVars[HHStoredVarPrefixKey + SK.plusLoveRaidMythic] =
     {
-    default:"0",
+    default:"off",
     storage:"Storage()",
     HHType:"Setting",
-    valueType:"Small Integer",
+    valueType:"String",
     customMenuID:"raidStarsSelector",
     getMenu:true,
     setMenu:true,
     menuType:"value",
     kobanUsing:false,
-    isValid: /^[0356]$/
+    isValid: /^(off|exact3|min3|exact5)$/
 };
 HHStoredVars[HHStoredVarPrefixKey + SK.plusLoveRaid] =
     {
@@ -2396,6 +2396,11 @@ HHStoredVars[HHStoredVarPrefixKey + TK.bossBangTeam] =
     HHType:"Temp"
 };
 HHStoredVars[HHStoredVarPrefixKey + TK.boosterStatus] =
+    {
+    storage:"sessionStorage",
+    HHType:"Temp"
+};
+HHStoredVars[HHStoredVarPrefixKey + TK.boosterStatusLastUpdate] =
     {
     storage:"sessionStorage",
     HHType:"Temp"

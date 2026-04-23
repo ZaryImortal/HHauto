@@ -16,6 +16,53 @@ c) TamperMonkey should automatically prompt you to install/update the script. If
 
 ## Latest Updates
 
+### v7.35.9 — Assign first 7 now applies the full team reliably
+
+Fixes [#1577](https://github.com/Roukys/HHauto/issues/1577).
+
+When using "Assign first 7" on the team edit page, some girls from the previous team could stay assigned instead of being replaced, leaving the team only partially updated. The new team is now applied correctly on the first click.
+
+---
+
+### v7.35.8 — Buy combativity for +Raid Stars raids
+
+When +Raid Stars was the only active raid mode and energy ran out, the script would not spend kobans to refill — even with enough kobans available above the reserve. Energy is now topped up as expected for +Raid Stars raids as well.
+
+---
+
+### v7.35.7 — League promotion threshold updated to top 20
+
+Fixes [#1567](https://github.com/Roukys/HHauto/issues/1567).
+
+The game now promotes the top 20 players of a league bracket instead of the top 15. The "Target League" / "Allow win" automation has been updated to match, so the script keeps you in the correct league instead of accidentally promoting or blocking fights based on the old cutoff.
+
+---
+
+### v7.35.6 — Booster auto-equip recovers from external changes
+
+Fixes [#1565](https://github.com/Roukys/HHauto/issues/1565).
+
+If boosters were changed in another browser or tab while the script was paused, auto-equip could get stuck retrying to equip already-occupied slots or repeatedly reload the Market page. The script now recognizes the out-of-sync state, refreshes the booster info from the Market and resumes normal operation.
+
+---
+
+### v7.35.5 — Simpler buy-combat and refined +Raid Stars
+
+Further addresses [#1565](https://github.com/Roukys/HHauto/issues/1565).
+
+**Buy combat controls simplified:**
+- Energy is now topped up immediately when empty and the event / mythic / raid girl has not been won yet — no more "last X hours" timing window
+- The "Hours to buy Combats" and "Hours to buy Mythic Combats" inputs are removed from the menu
+- The amount of energy purchased still comes from the existing "Troll auto buy", "Mythic auto buy" and "Raid auto buy" fields — change those if you want a different batch size
+
+**+Raid Stars refined:**
+- New options: Off, =3 ★★★ (exactly 3-star), ≥3 ★★★ (3-star and up), =5 ★★★★★ (exactly 5-star)
+- The unused 6-star option has been removed, as no mythic raids exist in-game
+- +Raid Stars now picks the first ending raid matching the selected grade on its own, independently from the "Raid selector" dropdown
+- Existing settings are migrated automatically — no manual reconfiguration needed
+
+---
+
 ### v7.35.4 — Troll menu: Event section separator and restored buy-combat controls
 
 Addresses [#1565](https://github.com/Roukys/HHauto/issues/1565). The Event section of the Troll Battle menu is now visually separated like Mythic and Raid, and the Buy Combat controls for Event are visible again.
